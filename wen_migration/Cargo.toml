@@ -1,0 +1,27 @@
+[package]
+name = "wen-migration"
+version = "0.0.1-alpha"
+description = "Program for migrating from metaplex to WNS"
+edition = "2018"
+
+[package.metadata.docs.rs]
+tags = ["wns", "alpha", "solana", "token_extensions"]
+
+[lib]
+crate-type = ["cdylib", "lib"]
+name = "wen_migration"
+
+[features]
+no-entrypoint = []
+no-idl = []
+cpi = ["no-entrypoint"]
+default = []
+
+[dependencies]
+anchor-lang = { git = "https://github.com/bridgesplit/anchor.git", features = ["interface-instructions", "init-if-needed"] }
+anchor-spl = { git = "shttps://github.com/bridgesplit/anchor.git", features = ["token_2022_extensions", "token_2022"] }
+spl-transfer-hook-interface = { version = "0.5.0" } 
+spl-tlv-account-resolution = "0.4.0"
+spl-pod = "0.1.0"
+mpl-token-metadata = "4.1.2"
+wen_new_standard = { git = "https://github.com/wen-community/wen-new-standard", features = ["cpi"] }
