@@ -1,46 +1,75 @@
-use anchor_lang::{prelude::*, solana_program::entrypoint::ProgramResult};
+use anchor_lang::{prelude::*, solana_program::sysvar::instructions::ID as instructions_id};
+use anchor_spl::{
+    associated_token::AssociatedToken,
+    token::{Mint, Token, TokenAccount},
+    token_2022::Token2022,
+};
 use mpl_token_metadata::{accounts::Metadata, instructions::BurnCpiBuilder, types::BurnArgs};
 use wen_new_standard::{
     cpi::{
         accounts::{AddGroup, AddMetadata, AddRoyalties, CreateMintAccount},
         add_metadata, add_mint_to_group, add_royalties, create_mint_account,
     },
+    program::WenNewStandard,
     AddMetadataArgs, CreateMintAccountArgs, CreatorWithShare, UpdateRoyaltiesArgs,
 };
 
-use crate::MigrationAuthorityPda;
+use crate::{MigrationAuthorityPda, MigrationMintPda};
 
 #[derive(Accounts)]
 #[instruction()]
 pub struct BurnMint<'info> {
+    pub nft_owner: Signer<'info>,
+    /// CHECK: cpi checks
     pub migration_authority_pda: Account<'info, MigrationAuthorityPda>,
-    pub migration_mint_pda: AccountInfo<'info>,
-    pub nft_owner: AccountInfo<'info>,
-    pub metaplex_collection: AccountInfo<'info>,
-    pub metaplex_collection_metadata: AccountInfo<'info>,
-    pub metaplex_nft_mint: AccountInfo<'info>,
-    pub metaplex_nft_token: AccountInfo<'info>,
-    pub metaplex_nft_metadata: AccountInfo<'info>,
-    pub metaplex_nft_master_edition: AccountInfo<'info>,
-    pub metaplex_nft_token_record: AccountInfo<'info>,
-    pub wns_manager: AccountInfo<'info>,
-    pub wns_group: AccountInfo<'info>,
-    pub wns_nft_mint: AccountInfo<'info>,
-    pub wns_nft_token: AccountInfo<'info>,
-    pub wns_nft_member_account: AccountInfo<'info>,
-    pub extra_metas_account: AccountInfo<'info>,
-    pub metaplex_program: AccountInfo<'info>,
-    pub wns_program: AccountInfo<'info>,
-    pub system_program: AccountInfo<'info>,
-    pub sysvar_instructions: AccountInfo<'info>,
-    pub rent: AccountInfo<'info>,
-    pub associated_token_program: AccountInfo<'info>,
-    pub token_program: AccountInfo<'info>,
-    pub token_program_2022: AccountInfo<'info>,
+    #[account(
+        seeds = [metaplex_nft_mint.key().as_ref()],
+        bump,
+    )]
+    pub migration_mint_pda: Account<'info, MigrationMintPda>,
+    /// CHECK: cpi checks
+    pub metaplex_collection: UncheckedAccount<'info>,
+    /// CHECK: cpi checks
+    pub metaplex_collection_metadata: UncheckedAccount<'info>,
+    #[account(mut)]
+    pub metaplex_nft_mint: Account<'info, Mint>,
+    #[account(mut)]
+    pub metaplex_nft_token: Account<'info, TokenAccount>,
+    /// CHECK: cpi checks
+    pub metaplex_nft_metadata: UncheckedAccount<'info>,
+    /// CHECK: cpi checks
+    pub metaplex_nft_master_edition: UncheckedAccount<'info>,
+    /// CHECK: cpi checks
+    pub metaplex_nft_token_record: UncheckedAccount<'info>,
+    /// CHECK: cpi checks
+    pub wns_manager: UncheckedAccount<'info>,
+    /// CHECK: cpi checks
+    pub wns_group: UncheckedAccount<'info>,
+    /// CHECK: cpi checks
+    pub wns_nft_mint: UncheckedAccount<'info>,
+    /// CHECK: cpi checkss
+    pub wns_nft_token: UncheckedAccount<'info>,
+    /// CHECK: cpi checks
+    pub wns_nft_member_account: UncheckedAccount<'info>,
+    /// CHECK: cpi checks
+    pub extra_metas_account: UncheckedAccount<'info>,
+    /// CHECK: constraint check
+    pub metaplex_program: UncheckedAccount<'info>,
+    pub wns_program: Program<'info, WenNewStandard>,
+    pub system_program: Program<'info, System>,
+    /// CHECK: constraint check
+    #[account(
+        constraint = sysvar_instructions.key() == instructions_id
+    )]
+    pub sysvar_instructions: UncheckedAccount<'info>,
+    pub rent: Sysvar<'info, Rent>,
+    pub associated_token_program: Program<'info, AssociatedToken>,
+    pub token_program: Program<'info, Token>,
+    pub token_program_2022: Program<'info, Token2022>,
 }
 
 impl<'info> BurnMint<'info> {
-    fn burn_metaplex_nft(&self) -> ProgramResult {
+    fn burn_metaplex_nft(&self) -> Result<()> {
         BurnCpiBuilder::new(&self.metaplex_program.to_account_info())
             .authority(&self.nft_owner.to_account_info())
             .collection_metadata(Some(&self.metaplex_collection_metadata.to_account_info()))
@@ -59,7 +88,7 @@ impl<'info> BurnMint<'info> {
         Ok(())
     }
 
-    fn mint_wns_nft(&self, args: CreateMintAccountArgs) -> ProgramResult {
+    fn mint_wns_nft(&self, args: CreateMintAccountArgs) -> Result<()> {
         let cpi_accounts = CreateMintAccount {
             payer: self.nft_owner.to_account_info(),
             authority: self.nft_owner.to_account_info(),
@@ -72,12 +101,12 @@ impl<'info> BurnMint<'info> {
             associated_token_program: self.associated_token_program.to_account_info(),
             token_program: self.token_program.to_account_info(),
         };
-        let cpi_ctx = CpiContext::new(self.wns_program.clone(), cpi_accounts);
+        let cpi_ctx = CpiContext::new(self.wns_program.to_account_info(), cpi_accounts);
         create_mint_account(cpi_ctx, args)?;
         Ok(())
     }
 
-    fn add_wns_nft_member(&self) -> ProgramResult {
+    fn add_wns_nft_member(&self) -> Result<()> {
         let cpi_accounts = AddGroup {
             payer: self.nft_owner.to_account_info(),
             group: self.wns_group.to_account_info(),
@@ -88,12 +117,12 @@ impl<'info> BurnMint<'info> {
             token_program: self.token_program.to_account_info(),
             system_program: self.system_program.to_account_info(),
         };
-        let cpi_ctx = CpiContext::new(self.wns_program.clone(), cpi_accounts);
+        let cpi_ctx = CpiContext::new(self.wns_program.to_account_info(), cpi_accounts);
         add_mint_to_group(cpi_ctx)?;
         Ok(())
     }
 
-    fn add_wns_royalties(&self, args: UpdateRoyaltiesArgs) -> ProgramResult {
+    fn add_wns_royalties(&self, args: UpdateRoyaltiesArgs) -> Result<()> {
         let cpi_accounts = AddRoyalties {
             payer: self.nft_owner.to_account_info(),
             authority: self.migration_authority_pda.to_account_info(),
@@ -102,23 +131,23 @@ impl<'info> BurnMint<'info> {
             system_program: self.system_program.to_account_info(),
             token_program: self.token_program_2022.to_account_info(),
         };
-        let cpi_ctx = CpiContext::new(self.token_program.clone(), cpi_accounts);
+        let cpi_ctx = CpiContext::new(self.token_program.to_account_info(), cpi_accounts);
         add_royalties(cpi_ctx, args)?;
         Ok(())
     }
 
-    fn add_wns_nft_extra_metadata(&self, args: Vec<AddMetadataArgs>) -> ProgramResult {
-        let cpi_accounts = AddMetadata {
-            payer: self.nft_owner.to_account_info(),
-            authority: self.wns_manager.to_account_info(),
-            mint: self.wns_nft_mint.to_account_info(),
-            system_program: self.system_program.to_account_info(),
-            token_program: self.token_program_2022.to_account_info(),
-        };
-        let cpi_ctx = CpiContext::new(self.wns_program.clone(), cpi_accounts);
-        add_metadata(cpi_ctx, args)?;
-        Ok(())
-    }
+    // fn add_wns_nft_extra_metadata(&self, args: Vec<AddMetadataArgs>) -> ProgramResult {
+    //     let cpi_accounts = AddMetadata {
+    //         payer: self.nft_owner.to_account_info(),
+    //         authority: self.wns_manager.to_account_info(),
+    //         mint: self.wns_nft_mint.to_account_info(),
+    //         system_program: self.system_program.to_account_info(),
+    //         token_program: self.token_program_2022.to_account_info(),
+    //     };
+    //     let cpi_ctx = CpiContext::new(self.wns_program.clone(), cpi_accounts);
+    //     add_metadata(cpi_ctx, args)?;
+    //     Ok(())
+    // }
 }
 
 pub fn handler(ctx: Context<BurnMint>) -> Result<()> {

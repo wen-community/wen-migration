@@ -1,7 +1,10 @@
 use anchor_lang::prelude::*;
+use anchor_spl::{associated_token::AssociatedToken, token_2022::Token2022};
 use wen_new_standard::{
     cpi::{accounts::CreateGroupAccount, create_group_account},
-    get_bump_in_seed_form, CreateGroupAccountArgs,
+    get_bump_in_seed_form,
+    program::WenNewStandard,
+    CreateGroupAccountArgs,
 };
 
 use crate::MigrationAuthorityPda;
@@ -19,15 +22,22 @@ pub struct MigrateCollection<'info> {
         bump,
     )]
     pub migration_authority_pda: Box<Account<'info, MigrationAuthorityPda>>,
-    pub wns_group: AccountInfo<'info>,
-    pub wns_group_mint: AccountInfo<'info>,
-    pub wns_group_mint_token_account: AccountInfo<'info>,
-    pub wns_manager: AccountInfo<'info>,
+    /// CHECK: cpi checks
+    #[account(mut)]
+    pub wns_group: UncheckedAccount<'info>,
+    #[account(mut)]
+    /// CHECK: cpi checks
+    pub wns_group_mint: UncheckedAccount<'info>,
+    #[account(mut)]
+    /// CHECK: cpi checks
+    pub wns_group_mint_token_account: UncheckedAccount<'info>,
+    /// CHECK: cpi checks
+    pub wns_manager: UncheckedAccount<'info>,
     pub rent: Sysvar<'info, Rent>,
-    pub associated_token_program: AccountInfo<'info>,
-    pub token_program: AccountInfo<'info>,
+    pub associated_token_program: Program<'info, AssociatedToken>,
+    pub token_program: Program<'info, Token2022>,
     pub system_program: Program<'info, System>,
-    pub wns_program: AccountInfo<'info>,
+    pub wns_program: Program<'info, WenNewStandard>,
 }
 
 impl<'info> MigrateCollection<'info> {

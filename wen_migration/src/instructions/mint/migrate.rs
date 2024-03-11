@@ -1,12 +1,13 @@
 use crate::{MigrationAuthorityPda, MigrationMintPda};
 use anchor_lang::prelude::*;
+use anchor_spl::token::Mint;
 
 #[derive(Accounts)]
 #[instruction()]
 pub struct MigrateMint<'info> {
     #[account(mut)]
     pub collection_authority: Signer<'info>,
-    pub metaplex_nft_mint: AccountInfo<'info>,
+    pub metaplex_nft_mint: Account<'info, Mint>,
     #[account(
         init,
         space = 8,

@@ -10,14 +10,14 @@ wallet = "~/.config/solana/id.json"
 
 [workspace]
 members = [
-  "wen-migration",
+  "wen_migration",
 ]
 
 [programs.localnet]
 wen_migration = "wns1gDLt8fgLcGhWi5MqAqgXpwEP1JftKE9eZnXS1HM"
 
 [scripts]
-test = "cd ../clients/wns-sdk && yarn test"
+test = "cd ../client && yarn test"
 
 
 [test.validator]

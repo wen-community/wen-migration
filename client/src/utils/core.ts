@@ -1,15 +1,10 @@
 import {
-	AnchorProvider, type Idl, Program, type Provider, utils,
+	AnchorProvider, type Idl, Program, type Provider,
 } from '@coral-xyz/anchor';
 import {Connection, PublicKey} from '@solana/web3.js';
 import {distributionProgramId, wnsProgramId, tokenProgramId} from './constants';
 import {ASSOCIATED_TOKEN_PROGRAM_ID} from '@solana/spl-token';
-import {
-	distributionIdl,
-	metadataIdl,
-	type WenRoyaltyDistribution,
-	type WenNewStandard,
-} from '../programs';
+import {type WenMigration, migrationIdl} from '../program';
 
 export const getProvider = () => {
 	const connection = new Connection(process.env.RPC_URL ?? 'https://api.devnet.solana.com');
@@ -18,17 +13,11 @@ export const getProvider = () => {
 	return provider;
 };
 
-export const getMetadataProgram = (provider: Provider) => new Program(
-	metadataIdl as Idl,
+export const getMigrationProgram = (provider: Provider) => new Program(
+	migrationIdl as Idl,
 	wnsProgramId,
 	provider,
-) as unknown as Program<WenNewStandard>;
-
-export const getDistributionProgram = (provider: Provider) => new Program(
-	distributionIdl as Idl,
-	distributionProgramId,
-	provider,
-) as unknown as Program<WenRoyaltyDistribution>;
+) as unknown as Program<WenMigration>;
 
 export const getProgramAddress = (seeds: Uint8Array[], programId: PublicKey) => {
 	const [key] = PublicKey.findProgramAddressSync(seeds, programId);
@@ -40,38 +29,14 @@ export const getAtaAddress = (mint: string, owner: string): PublicKey => getProg
 	ASSOCIATED_TOKEN_PROGRAM_ID,
 );
 
-export const getGroupAccountPda = (mint: string) => {
-	const [groupAccount] = PublicKey.findProgramAddressSync([utils.bytes.utf8.encode('group'), new PublicKey(mint).toBuffer()], wnsProgramId);
+export const getMigrationAuthorityPda = (group: string) => {
+	const [migrationAuthority] = PublicKey.findProgramAddressSync([new PublicKey(group).toBuffer()], wnsProgramId);
 
-	return groupAccount;
+	return migrationAuthority;
 };
 
-export const getMemberAccountPda = (mint: string) => {
-	const [groupAccount] = PublicKey.findProgramAddressSync([utils.bytes.utf8.encode('member'), new PublicKey(mint).toBuffer()], wnsProgramId);
+export const getMigrationMintPda = (mint: string) => {
+	const [migrationMint] = PublicKey.findProgramAddressSync([new PublicKey(mint).toBuffer()], wnsProgramId);
 
-	return groupAccount;
-};
-
-export const getExtraMetasAccountPda = (mint: string) => {
-	const [extraMetasAccount] = PublicKey.findProgramAddressSync([utils.bytes.utf8.encode('extra-account-metas'), new PublicKey(mint).toBuffer()], wnsProgramId);
-
-	return extraMetasAccount;
-};
-
-export const getDistributionAccountPda = (groupMint: string, paymentMint: string) => {
-	const [distributionAccount] = PublicKey.findProgramAddressSync([new PublicKey(groupMint).toBuffer(), new PublicKey(paymentMint).toBuffer()], distributionProgramId);
-
-	return distributionAccount;
-};
-
-export const getManagerAccountPda = () => {
-	const [managerAccount] = PublicKey.findProgramAddressSync([utils.bytes.utf8.encode('manager')], wnsProgramId);
-
-	return managerAccount;
-};
-
-export const getApproveAccountPda = (mint: string) => {
-	const [approveAccount] = PublicKey.findProgramAddressSync([utils.bytes.utf8.encode('approve-account'), new PublicKey(mint).toBuffer()], wnsProgramId);
-
-	return approveAccount;
+	return migrationMint;
 };
