@@ -70,11 +70,15 @@ export type WenMigration = {
           "type": {
             "defined": "wen_new_standard::CreateGroupAccountArgs"
           }
+        },
+        {
+          "name": "royalties",
+          "type": "bool"
         }
       ]
     },
     {
-      "name": "migrateMint",
+      "name": "whitelistMint",
       "docs": [
         "create a pda representing a migration mint"
       ],
@@ -95,7 +99,7 @@ export type WenMigration = {
           "isSigner": false
         },
         {
-          "name": "migrationAuthority",
+          "name": "migrationAuthorityPda",
           "isMut": false,
           "isSigner": false
         },
@@ -108,7 +112,7 @@ export type WenMigration = {
       "args": []
     },
     {
-      "name": "burnMint",
+      "name": "migrateMint",
       "accounts": [
         {
           "name": "nftOwner",
@@ -122,7 +126,7 @@ export type WenMigration = {
         },
         {
           "name": "migrationMintPda",
-          "isMut": false,
+          "isMut": true,
           "isSigner": false
         },
         {
@@ -257,6 +261,10 @@ export type WenMigration = {
           {
             "name": "authority",
             "type": "publicKey"
+          },
+          {
+            "name": "royalties",
+            "type": "bool"
           }
         ]
       }
@@ -353,11 +361,15 @@ export const IDL: WenMigration = {
           "type": {
             "defined": "wen_new_standard::CreateGroupAccountArgs"
           }
+        },
+        {
+          "name": "royalties",
+          "type": "bool"
         }
       ]
     },
     {
-      "name": "migrateMint",
+      "name": "whitelistMint",
       "docs": [
         "create a pda representing a migration mint"
       ],
@@ -378,7 +390,7 @@ export const IDL: WenMigration = {
           "isSigner": false
         },
         {
-          "name": "migrationAuthority",
+          "name": "migrationAuthorityPda",
           "isMut": false,
           "isSigner": false
         },
@@ -391,7 +403,7 @@ export const IDL: WenMigration = {
       "args": []
     },
     {
-      "name": "burnMint",
+      "name": "migrateMint",
       "accounts": [
         {
           "name": "nftOwner",
@@ -405,7 +417,7 @@ export const IDL: WenMigration = {
         },
         {
           "name": "migrationMintPda",
-          "isMut": false,
+          "isMut": true,
           "isSigner": false
         },
         {
@@ -540,6 +552,10 @@ export const IDL: WenMigration = {
           {
             "name": "authority",
             "type": "publicKey"
+          },
+          {
+            "name": "royalties",
+            "type": "bool"
           }
         ]
       }
