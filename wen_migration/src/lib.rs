@@ -19,17 +19,18 @@ pub mod wen_migration {
     pub fn migrate_collection(
         ctx: Context<MigrateCollection>,
         args: wen_new_standard::CreateGroupAccountArgs,
+        royalties: bool,
     ) -> Result<()> {
-        instructions::collection::handler(ctx, args)
+        instructions::collection::handler(ctx, args, royalties)
     }
 
     /// create a pda representing a migration mint
-    pub fn migrate_mint(ctx: Context<MigrateMint>) -> Result<()> {
+    pub fn whitelist_mint(_ctx: Context<WhitelistMint>) -> Result<()> {
         // empty function because pda is created in the instruction
         Ok(())
     }
 
-    pub fn burn_mint(ctx: Context<BurnMint>) -> Result<()> {
-        instructions::mint::burn::handler(ctx)
+    pub fn migrate_mint(ctx: Context<MigrateMint>) -> Result<()> {
+        instructions::mint::migrate::handler(ctx)
     }
 }

@@ -1,5 +1,5 @@
-pub mod burn;
 pub mod migrate;
+pub mod whitelist;
 
-pub use burn::*;
 pub use migrate::*;
+pub use whitelist::*;
