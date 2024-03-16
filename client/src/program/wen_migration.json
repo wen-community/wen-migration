@@ -70,11 +70,15 @@
           "type": {
             "defined": "wen_new_standard::CreateGroupAccountArgs"
           }
+        },
+        {
+          "name": "royalties",
+          "type": "bool"
         }
       ]
     },
     {
-      "name": "migrateMint",
+      "name": "whitelistMint",
       "docs": [
         "create a pda representing a migration mint"
       ],
@@ -95,7 +99,7 @@
           "isSigner": false
         },
         {
-          "name": "migrationAuthority",
+          "name": "migrationAuthorityPda",
           "isMut": false,
           "isSigner": false
         },
@@ -108,7 +112,7 @@
       "args": []
     },
     {
-      "name": "burnMint",
+      "name": "migrateMint",
       "accounts": [
         {
           "name": "nftOwner",
@@ -122,7 +126,7 @@
         },
         {
           "name": "migrationMintPda",
-          "isMut": false,
+          "isMut": true,
           "isSigner": false
         },
         {
@@ -257,6 +261,10 @@
           {
             "name": "authority",
             "type": "publicKey"
+          },
+          {
+            "name": "royalties",
+            "type": "bool"
           }
         ]
       }

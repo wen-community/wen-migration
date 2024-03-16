@@ -8,4 +8,5 @@ pub struct MigrationMintPda {}
 pub struct MigrationAuthorityPda {
     pub wns_group: Pubkey,
     pub authority: Pubkey,
+    pub royalties: bool,
 }

@@ -1,97 +1,94 @@
-import {type Provider} from '@coral-xyz/anchor';
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
+/* eslint-disable @typescript-eslint/no-unsafe-call */
 import {
-	getAtaAddress, getExtraMetasAccountPda, getManagerAccountPda, getMemberAccountPda, getMetadataProgram,
+	getAtaAddress,
+	getExtraMetasAccountPda,
+	getManagerAccountPda,
+	getMemberAccountPda,
+	getMigrationAuthorityPda,
+	getMigrationProgram,
+	getWhitelistMintPda,
 } from '../utils/core';
-import {type CommonArgs, type Creator} from '../utils/types';
-import {PublicKey, SYSVAR_RENT_PUBKEY, SystemProgram} from '@solana/web3.js';
-import {tokenProgramId} from '../utils/constants';
-import {ASSOCIATED_TOKEN_PROGRAM_ID} from '@solana/spl-token';
+import {
+	Keypair, PublicKey, SYSVAR_INSTRUCTIONS_PUBKEY, SYSVAR_RENT_PUBKEY, SystemProgram,
+} from '@solana/web3.js';
+import {AnchorProvider, type Provider} from '@coral-xyz/anchor';
+import {tokenProgramId, wnsProgramId} from '../utils';
+import {
+	Metaplex,
+	walletAdapterIdentity,
+} from '@metaplex-foundation/js';
+import {ASSOCIATED_TOKEN_PROGRAM_ID, TOKEN_PROGRAM_ID} from '@solana/spl-token';
+export type WhitelsitMintArgs = {
+	metaplexMint: string;
+	group: string;
+	authority: string;
+};
 
-export type CreateNftArgs = {
-	mint: string;
-	name: string;
-	symbol: string;
-	uri: string;
-	receiver: string;
-} & CommonArgs;
-
-export const getMintNftIx = async (provider: Provider, args: CreateNftArgs) => {
-	const metadataProgram = getMetadataProgram(provider);
-
-	const managerAccount = getManagerAccountPda();
-
-	const ix = await metadataProgram.methods
-		.createMintAccount(args)
+export const getWhitelistMintIx = async (provider: Provider, args: WhitelsitMintArgs) => {
+	const migrationProgram = getMigrationProgram(provider);
+	const migrationAuthorityPda = getMigrationAuthorityPda(args.group);
+	const migrationMintPda = getWhitelistMintPda(args.metaplexMint, args.group);
+	const ix = await migrationProgram.methods
+		.whitelistMint()
 		.accountsStrict({
-			payer: args.payer,
-			authority: args.authority,
-			receiver: args.receiver,
-			mint: args.mint,
-			mintTokenAccount: getAtaAddress(args.mint, args.receiver),
+			collectionAuthority: args.authority,
+			migrationAuthorityPda,
 			systemProgram: SystemProgram.programId,
+			metaplexNftMint: args.metaplexMint,
+			migrationMintPda,
+		})
+		.instruction();
+	return ix;
+};
+
+export type MigrateMintArgs = {
+	metaplexMint: string;
+	group: string;
+	owner: string;
+	metaplexCollection: string;
+	metaplexCollectionMetadata: string;
+	metaplexNftToken: string;
+};
+
+export const getMigrateMintIx = async (provider: Provider, args: MigrateMintArgs) => {
+	const migrationProgram = getMigrationProgram(provider);
+	const migrationAuthorityPda = getMigrationAuthorityPda(args.group);
+	const migrationMintPda = getWhitelistMintPda(args.metaplexMint, args.group);
+	const manager = getManagerAccountPda();
+	const metaplex = new Metaplex(provider.connection).use(
+		walletAdapterIdentity(AnchorProvider.env().wallet),
+	);
+	const mintAta = getAtaAddress(args.metaplexMint, TOKEN_PROGRAM_ID.toString());
+	const wnsNftMint = new Keypair();
+	const ix = await migrationProgram.methods
+		.migrateMint()
+		.accountsStrict({
+			migrationAuthorityPda,
+			wnsGroup: args.group,
+			wnsManager: manager,
 			rent: SYSVAR_RENT_PUBKEY,
 			associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID,
 			tokenProgram: tokenProgramId,
-			manager: managerAccount,
-		})
-		.instruction();
-	return ix;
-};
-
-export type AddGroupArgs = {
-	mint: string;
-	group: string;
-} & CommonArgs;
-
-export const getAddNftToGroupIx = async (provider: Provider, args: AddGroupArgs) => {
-	const metadataProgram = getMetadataProgram(provider);
-	const memberAccount = getMemberAccountPda(args.mint);
-
-	const ix = await metadataProgram.methods
-		.addMintToGroup()
-		.accountsStrict({
-			payer: args.payer,
-			authority: args.authority,
-			mint: args.mint,
 			systemProgram: SystemProgram.programId,
-			tokenProgram: tokenProgramId,
-			group: args.group,
-			member: memberAccount,
-			manager: getManagerAccountPda(),
+			wnsProgram: wnsProgramId,
+			metaplexNftMint: args.metaplexMint,
+			migrationMintPda,
+			nftOwner: args.owner,
+			metaplexCollection: args.metaplexCollection,
+			metaplexCollectionMetadata: args.metaplexCollectionMetadata,
+			metaplexNftToken: args.metaplexNftToken,
+			metaplexNftMetadata: metaplex.nfts().pdas().metadata({mint: new PublicKey(args.metaplexMint)}),
+			metaplexNftMasterEdition: metaplex.nfts().pdas().masterEdition({mint: new PublicKey(args.metaplexMint)}),
+			metaplexNftTokenRecord: metaplex.nfts().pdas().tokenRecord({mint: new PublicKey(args.metaplexMint), token: mintAta}),
+			wnsNftMint: wnsNftMint.publicKey,
+			wnsNftToken: getAtaAddress(wnsNftMint.publicKey.toString(), tokenProgramId.toString()),
+			wnsNftMemberAccount: getMemberAccountPda(wnsNftMint.publicKey.toString()),
+			extraMetasAccount: getExtraMetasAccountPda(args.metaplexMint),
+			metaplexProgram: metaplex.programs().getTokenMetadata().address,
+			sysvarInstructions: SYSVAR_INSTRUCTIONS_PUBKEY,
+			tokenProgram2022: tokenProgramId,
 		})
 		.instruction();
-
-	return ix;
-};
-
-export type AddRoyaltiesArgs = {
-	mint: string;
-	royaltyBasisPoints: number;
-	creators: Creator[];
-} & CommonArgs;
-
-export const getAddRoyaltiesIx = async (provider: Provider, args: AddRoyaltiesArgs) => {
-	const metadataProgram = getMetadataProgram(provider);
-
-	const extraMetasAccount = getExtraMetasAccountPda(args.mint);
-
-	const ix = await metadataProgram.methods
-		.addRoyalties({
-			royaltyBasisPoints: args.royaltyBasisPoints,
-			creators: args.creators.map(creator => ({
-				address: new PublicKey(creator.address),
-				share: creator.share,
-			})),
-		})
-		.accountsStrict({
-			payer: args.payer,
-			authority: args.authority,
-			systemProgram: SystemProgram.programId,
-			tokenProgram: tokenProgramId,
-			extraMetasAccount,
-			mint: args.mint,
-		})
-		.instruction();
-
 	return ix;
 };

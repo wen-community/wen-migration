@@ -24,7 +24,7 @@ pub struct MigrateCollection<'info> {
     pub migration_authority_pda: Box<Account<'info, MigrationAuthorityPda>>,
     /// CHECK: cpi checks
     #[account(mut)]
-    pub wns_group: UncheckedAccount<'info>,
+    pub wns_group: Signer<'info>,
     #[account(mut)]
     /// CHECK: cpi checks
     pub wns_group_mint: UncheckedAccount<'info>,
@@ -65,9 +65,14 @@ impl<'info> MigrateCollection<'info> {
     }
 }
 
-pub fn handler(ctx: Context<MigrateCollection>, args: CreateGroupAccountArgs) -> Result<()> {
+pub fn handler(
+    ctx: Context<MigrateCollection>,
+    args: CreateGroupAccountArgs,
+    royalties: bool,
+) -> Result<()> {
     ctx.accounts.migration_authority_pda.authority = ctx.accounts.collection_authority.key();
     ctx.accounts.migration_authority_pda.wns_group = ctx.accounts.wns_group.key();
+    ctx.accounts.migration_authority_pda.royalties = royalties;
     let wns_group = ctx.accounts.wns_group.key();
     let signer_seeds = [
         wns_group.as_ref(),
