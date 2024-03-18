@@ -3,7 +3,7 @@ import {
 	utils,
 } from '@coral-xyz/anchor';
 import {Connection, PublicKey} from '@solana/web3.js';
-import {wnsProgramId, tokenProgramId} from './constants';
+import {wnsProgramId, tokenProgramId, mplTokenProgramId} from './constants';
 import {ASSOCIATED_TOKEN_PROGRAM_ID} from '@solana/spl-token';
 import {type WenMigration, migrationIdl} from '../program';
 
@@ -65,4 +65,44 @@ export const getExtraMetasAccountPda = (mint: string) => {
 	const [extraMetasAccount] = PublicKey.findProgramAddressSync([utils.bytes.utf8.encode('extra-account-metas'), new PublicKey(mint).toBuffer()], wnsProgramId);
 
 	return extraMetasAccount;
+};
+
+export const getMetaplexTokenRecord = (mint: string, ata: string) => {
+	const [tokenRecord] = PublicKey.findProgramAddressSync(
+		[
+			Buffer.from(utils.bytes.utf8.encode('metadata')),
+			mplTokenProgramId.toBytes(),
+			new PublicKey(mint).toBytes(),
+			Buffer.from(utils.bytes.utf8.encode('token_record')),
+			new PublicKey(ata).toBytes(),
+		],
+		mplTokenProgramId,
+	);
+
+	return tokenRecord;
+};
+
+export const getMetaplexMasterEdition = (mint: string) => {
+	const [nftMasterEdition] = PublicKey.findProgramAddressSync(
+		[
+			Buffer.from(utils.bytes.utf8.encode('metadata')),
+			mplTokenProgramId.toBytes(),
+			new PublicKey(mint).toBytes(),
+			Buffer.from(utils.bytes.utf8.encode('edition')),
+		],
+		mplTokenProgramId,
+	);
+
+	return nftMasterEdition;
+};
+
+export const getMetaplexMetadata = (mint: string) => {
+	const [nftMetadata] = PublicKey.findProgramAddressSync(
+		[Buffer.from(utils.bytes.utf8.encode('metadata')),
+			mplTokenProgramId.toBytes(),
+			new PublicKey(mint).toBytes()],
+		mplTokenProgramId,
+	);
+
+	return nftMetadata;
 };

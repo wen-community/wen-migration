@@ -1,0 +1,16 @@
+import { AnchorProvider, Program, type Provider } from '@coral-xyz/anchor';
+import { PublicKey } from '@solana/web3.js';
+import { type WenMigration } from '../program';
+export declare const getProvider: () => AnchorProvider;
+export declare const getMigrationProgram: (provider: Provider) => Program<WenMigration>;
+export declare const getProgramAddress: (seeds: Uint8Array[], programId: PublicKey) => PublicKey;
+export declare const getGroupAccountPda: (mint: string) => PublicKey;
+export declare const getAtaAddress: (mint: string, owner: string) => PublicKey;
+export declare const getMigrationAuthorityPda: (group: string) => PublicKey;
+export declare const getWhitelistMintPda: (mint: string, group: string) => PublicKey;
+export declare const getManagerAccountPda: () => PublicKey;
+export declare const getMemberAccountPda: (mint: string) => PublicKey;
+export declare const getExtraMetasAccountPda: (mint: string) => PublicKey;
+export declare const getMetaplexTokenRecord: (mint: string, ata: string) => PublicKey;
+export declare const getMetaplexMasterEdition: (mint: string) => PublicKey;
+export declare const getMetaplexMetadata: (mint: string) => PublicKey;

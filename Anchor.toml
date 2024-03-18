@@ -14,7 +14,7 @@ members = [
 ]
 
 [programs.localnet]
-wen_migration = "wns1gDLt8fgLcGhWi5MqAqgXpwEP1JftKE9eZnXS1HM"
+wen_migration = "Mgr8nJhQpzhC4mEnaqYvktGJRVEJPjXLhfGccLYTgFe"
 
 [scripts]
 test = "cd ../client && yarn test"
