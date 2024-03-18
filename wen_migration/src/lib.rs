@@ -8,7 +8,7 @@ pub use errors::*;
 pub use instructions::*;
 pub use state::*;
 
-declare_id!("diste3nXmK7ddDTs1zb6uday6j4etCa9RChD8fJ1xay");
+declare_id!("Mgr8nJhQpzhC4mEnaqYvktGJRVEJPjXLhfGccLYTgFe");
 
 #[program]
 pub mod wen_migration {

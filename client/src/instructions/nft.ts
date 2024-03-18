@@ -5,19 +5,19 @@ import {
 	getExtraMetasAccountPda,
 	getManagerAccountPda,
 	getMemberAccountPda,
+	getMetaplexMasterEdition,
+	getMetaplexMetadata,
+	getMetaplexTokenRecord,
 	getMigrationAuthorityPda,
 	getMigrationProgram,
 	getWhitelistMintPda,
 } from '../utils/core';
 import {
-	Keypair, PublicKey, SYSVAR_INSTRUCTIONS_PUBKEY, SYSVAR_RENT_PUBKEY, SystemProgram,
+	Keypair, SYSVAR_INSTRUCTIONS_PUBKEY, SYSVAR_RENT_PUBKEY, SystemProgram,
+	type TransactionInstruction,
 } from '@solana/web3.js';
-import {AnchorProvider, type Provider} from '@coral-xyz/anchor';
-import {tokenProgramId, wnsProgramId} from '../utils';
-import {
-	Metaplex,
-	walletAdapterIdentity,
-} from '@metaplex-foundation/js';
+import {type Provider} from '@coral-xyz/anchor';
+import {mplTokenProgramId, tokenProgramId, wnsProgramId} from '../utils';
 import {ASSOCIATED_TOKEN_PROGRAM_ID, TOKEN_PROGRAM_ID} from '@solana/spl-token';
 export type WhitelsitMintArgs = {
 	metaplexMint: string;
@@ -25,20 +25,22 @@ export type WhitelsitMintArgs = {
 	authority: string;
 };
 
-export const getWhitelistMintIx = async (provider: Provider, args: WhitelsitMintArgs) => {
+export const getWhitelistMintIx = async (provider: Provider, args: WhitelsitMintArgs): Promise<TransactionInstruction> => {
+	const {authority, group, metaplexMint} = args;
 	const migrationProgram = getMigrationProgram(provider);
-	const migrationAuthorityPda = getMigrationAuthorityPda(args.group);
-	const migrationMintPda = getWhitelistMintPda(args.metaplexMint, args.group);
-	const ix = await migrationProgram.methods
+	const migrationAuthorityPda = getMigrationAuthorityPda(group);
+	const migrationMintPda = getWhitelistMintPda(metaplexMint, group);
+	const ix: TransactionInstruction = await migrationProgram.methods
 		.whitelistMint()
 		.accountsStrict({
-			collectionAuthority: args.authority,
+			collectionAuthority: authority,
 			migrationAuthorityPda,
 			systemProgram: SystemProgram.programId,
 			metaplexNftMint: args.metaplexMint,
 			migrationMintPda,
 		})
 		.instruction();
+
 	return ix;
 };
 
@@ -47,45 +49,44 @@ export type MigrateMintArgs = {
 	group: string;
 	owner: string;
 	metaplexCollection: string;
-	metaplexCollectionMetadata: string;
-	metaplexNftToken: string;
 };
 
-export const getMigrateMintIx = async (provider: Provider, args: MigrateMintArgs) => {
+export const getMigrateMintIx = async (provider: Provider, args: MigrateMintArgs): Promise<TransactionInstruction> => {
+	const {owner, group, metaplexCollection, metaplexMint} = args;
+
 	const migrationProgram = getMigrationProgram(provider);
-	const migrationAuthorityPda = getMigrationAuthorityPda(args.group);
-	const migrationMintPda = getWhitelistMintPda(args.metaplexMint, args.group);
+	const migrationAuthorityPda = getMigrationAuthorityPda(group);
+	const migrationMintPda = getWhitelistMintPda(metaplexMint, group);
 	const manager = getManagerAccountPda();
-	const metaplex = new Metaplex(provider.connection).use(
-		walletAdapterIdentity(AnchorProvider.env().wallet),
-	);
+
 	const mintAta = getAtaAddress(args.metaplexMint, TOKEN_PROGRAM_ID.toString());
+
 	const wnsNftMint = new Keypair();
 	const ix = await migrationProgram.methods
 		.migrateMint()
 		.accountsStrict({
 			migrationAuthorityPda,
-			wnsGroup: args.group,
+			wnsGroup: group,
 			wnsManager: manager,
 			rent: SYSVAR_RENT_PUBKEY,
 			associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID,
 			tokenProgram: tokenProgramId,
 			systemProgram: SystemProgram.programId,
 			wnsProgram: wnsProgramId,
-			metaplexNftMint: args.metaplexMint,
+			metaplexNftMint: metaplexMint,
 			migrationMintPda,
-			nftOwner: args.owner,
-			metaplexCollection: args.metaplexCollection,
-			metaplexCollectionMetadata: args.metaplexCollectionMetadata,
-			metaplexNftToken: args.metaplexNftToken,
-			metaplexNftMetadata: metaplex.nfts().pdas().metadata({mint: new PublicKey(args.metaplexMint)}),
-			metaplexNftMasterEdition: metaplex.nfts().pdas().masterEdition({mint: new PublicKey(args.metaplexMint)}),
-			metaplexNftTokenRecord: metaplex.nfts().pdas().tokenRecord({mint: new PublicKey(args.metaplexMint), token: mintAta}),
+			nftOwner: owner,
+			metaplexCollection,
+			metaplexCollectionMetadata: getMetaplexMetadata(metaplexCollection),
+			metaplexNftToken: mintAta,
+			metaplexNftMetadata: getMetaplexMetadata(metaplexMint),
+			metaplexNftMasterEdition: getMetaplexMasterEdition(metaplexMint),
+			metaplexNftTokenRecord: getMetaplexTokenRecord(metaplexMint, mintAta.toString()),
 			wnsNftMint: wnsNftMint.publicKey,
 			wnsNftToken: getAtaAddress(wnsNftMint.publicKey.toString(), tokenProgramId.toString()),
 			wnsNftMemberAccount: getMemberAccountPda(wnsNftMint.publicKey.toString()),
 			extraMetasAccount: getExtraMetasAccountPda(args.metaplexMint),
-			metaplexProgram: metaplex.programs().getTokenMetadata().address,
+			metaplexProgram: mplTokenProgramId,
 			sysvarInstructions: SYSVAR_INSTRUCTIONS_PUBKEY,
 			tokenProgram2022: tokenProgramId,
 		})
