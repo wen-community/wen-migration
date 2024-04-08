@@ -1,14 +1,16 @@
 import {ASSOCIATED_TOKEN_PROGRAM_ID} from '@solana/spl-token';
-import {tokenProgramId, wnsProgramId} from '../utils/constants';
+import {token22ProgramId, wnsProgramId} from '../utils/constants';
 import {
-	getAtaAddress,
 	getGroupAccountPda,
 	getManagerAccountPda,
 	getMigrationAuthorityPda,
 	getMigrationProgram,
+	getWnsAtaAddress,
 } from '../utils/core';
-import {Keypair, SYSVAR_RENT_PUBKEY, SystemProgram} from '@solana/web3.js';
-import {type Provider} from '@coral-xyz/anchor';
+import {
+	PublicKey, SYSVAR_RENT_PUBKEY, SystemProgram,
+} from '@solana/web3.js';
+import {BN, type Provider} from '@coral-xyz/anchor';
 
 export type CreateGroupArgs = {
 	name: string;
@@ -16,29 +18,33 @@ export type CreateGroupArgs = {
 	uri: string;
 	maxSize: number;
 	royalties: boolean;
+	group: string;
 };
 
 export const getMigrateCollectionIx = async (provider: Provider, args: CreateGroupArgs) => {
 	const migrationProgram = getMigrationProgram(provider);
-	const groupMint = new Keypair();
-	const group = getGroupAccountPda(groupMint.publicKey.toString());
+	const groupMint = new PublicKey(args.group);
+	const group = getGroupAccountPda(args.group);
 	const migrationAuthorityPda = getMigrationAuthorityPda(group.toString());
+	const authority = provider.publicKey ?? PublicKey.default;
+	const collectionSize = new BN(args.maxSize) as BN;
+
 	const ix = await migrationProgram.methods
-		.migrateCollection({
-			name: args.name,
-			symbol: args.symbol,
-			uri: args.uri,
-			maxSize: args.maxSize,
-		}, args.royalties)
+		.migrateCollection(
+			args.name,
+			args.symbol,
+			args.uri,
+			collectionSize,
+			args.royalties)
 		.accountsStrict({
 			systemProgram: SystemProgram.programId,
 			rent: SYSVAR_RENT_PUBKEY,
 			associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID,
-			tokenProgram: tokenProgramId,
-			collectionAuthority: migrationAuthorityPda,
+			tokenProgram: token22ProgramId,
+			collectionAuthority: authority,
 			wnsGroup: group,
-			wnsGroupMint: groupMint.publicKey,
-			wnsGroupMintTokenAccount: getAtaAddress(groupMint.publicKey.toString(), tokenProgramId.toString()),
+			wnsGroupMint: groupMint,
+			wnsGroupMintTokenAccount: getWnsAtaAddress(args.group, authority.toString()),
 			wnsManager: getManagerAccountPda(),
 			wnsProgram: wnsProgramId,
 			migrationAuthorityPda,

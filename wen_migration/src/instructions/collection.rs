@@ -16,7 +16,7 @@ pub struct MigrateCollection<'info> {
     pub collection_authority: Signer<'info>,
     #[account(
         init,
-        space = 8,
+        space = 8 + MigrationAuthorityPda::INIT_SPACE,
         payer = collection_authority,
         seeds = [wns_group.key().as_ref()],
         bump,
@@ -24,10 +24,10 @@ pub struct MigrateCollection<'info> {
     pub migration_authority_pda: Box<Account<'info, MigrationAuthorityPda>>,
     /// CHECK: cpi checks
     #[account(mut)]
-    pub wns_group: Signer<'info>,
+    pub wns_group: UncheckedAccount<'info>,
     #[account(mut)]
     /// CHECK: cpi checks
-    pub wns_group_mint: UncheckedAccount<'info>,
+    pub wns_group_mint: Signer<'info>,
     #[account(mut)]
     /// CHECK: cpi checks
     pub wns_group_mint_token_account: UncheckedAccount<'info>,
@@ -67,18 +67,23 @@ impl<'info> MigrateCollection<'info> {
 
 pub fn handler(
     ctx: Context<MigrateCollection>,
-    args: CreateGroupAccountArgs,
+    name: String,
+    symbol: String,
+    uri: String,
+    max_size: u32,
     royalties: bool,
 ) -> Result<()> {
-    ctx.accounts.migration_authority_pda.authority = ctx.accounts.collection_authority.key();
-    ctx.accounts.migration_authority_pda.wns_group = ctx.accounts.wns_group.key();
-    ctx.accounts.migration_authority_pda.royalties = royalties;
+    let migration_authority_pda = &mut ctx.accounts.migration_authority_pda;
+    migration_authority_pda.authority = ctx.accounts.collection_authority.key();
+    migration_authority_pda.wns_group = ctx.accounts.wns_group.key();
+    migration_authority_pda.royalties = royalties;
+
     let wns_group = ctx.accounts.wns_group.key();
     let signer_seeds = [
         wns_group.as_ref(),
         &get_bump_in_seed_form(&ctx.bumps.migration_authority_pda),
     ];
     ctx.accounts
-        .create_wns_collection(args, &[&signer_seeds[..]])?;
+        .create_wns_collection(CreateGroupAccountArgs { name, symbol, uri, max_size }, &[&signer_seeds[..]])?;
     Ok(())
 }

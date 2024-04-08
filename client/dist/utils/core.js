@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getMetaplexMetadata = exports.getMetaplexMasterEdition = exports.getMetaplexTokenRecord = exports.getExtraMetasAccountPda = exports.getMemberAccountPda = exports.getManagerAccountPda = exports.getWhitelistMintPda = exports.getMigrationAuthorityPda = exports.getAtaAddress = exports.getGroupAccountPda = exports.getProgramAddress = exports.getMigrationProgram = exports.getProvider = void 0;
+exports.getMetaplexMetadata = exports.getMetaplexMasterEdition = exports.getMetaplexTokenRecord = exports.getExtraMetasAccountPda = exports.getMemberAccountPda = exports.getManagerAccountPda = exports.getWhitelistMintPda = exports.getMigrationAuthorityPda = exports.getWnsAtaAddress = exports.getMetaplexAtaAddress = exports.getGroupAccountPda = exports.getProgramAddress = exports.getMigrationProgram = exports.getProvider = void 0;
 const anchor_1 = require("@coral-xyz/anchor");
 const web3_js_1 = require("@solana/web3.js");
 const constants_1 = require("./constants");
@@ -14,7 +14,7 @@ const getProvider = () => {
     return provider;
 };
 exports.getProvider = getProvider;
-const getMigrationProgram = (provider) => new anchor_1.Program(program_1.migrationIdl, constants_1.wnsProgramId, provider);
+const getMigrationProgram = (provider) => new anchor_1.Program(program_1.migrationIdl, constants_1.migrationProgramId, provider);
 exports.getMigrationProgram = getMigrationProgram;
 const getProgramAddress = (seeds, programId) => {
     const [key] = web3_js_1.PublicKey.findProgramAddressSync(seeds, programId);
@@ -26,16 +26,18 @@ const getGroupAccountPda = (mint) => {
     return groupAccount;
 };
 exports.getGroupAccountPda = getGroupAccountPda;
-const getAtaAddress = (mint, owner) => (0, exports.getProgramAddress)([new web3_js_1.PublicKey(owner).toBuffer(), constants_1.tokenProgramId.toBuffer(), new web3_js_1.PublicKey(mint).toBuffer()], spl_token_1.ASSOCIATED_TOKEN_PROGRAM_ID);
-exports.getAtaAddress = getAtaAddress;
+const getMetaplexAtaAddress = (mint, owner) => (0, exports.getProgramAddress)([new web3_js_1.PublicKey(owner).toBuffer(), constants_1.tokenTradProgramId.toBuffer(), new web3_js_1.PublicKey(mint).toBuffer()], spl_token_1.ASSOCIATED_TOKEN_PROGRAM_ID);
+exports.getMetaplexAtaAddress = getMetaplexAtaAddress;
+const getWnsAtaAddress = (mint, owner) => (0, exports.getProgramAddress)([new web3_js_1.PublicKey(owner).toBuffer(), constants_1.token22ProgramId.toBuffer(), new web3_js_1.PublicKey(mint).toBuffer()], spl_token_1.ASSOCIATED_TOKEN_PROGRAM_ID);
+exports.getWnsAtaAddress = getWnsAtaAddress;
 const getMigrationAuthorityPda = (group) => {
-    const [migrationAuthority] = web3_js_1.PublicKey.findProgramAddressSync([new web3_js_1.PublicKey(group).toBuffer()], constants_1.wnsProgramId);
+    const [migrationAuthority] = web3_js_1.PublicKey.findProgramAddressSync([new web3_js_1.PublicKey(group).toBuffer()], constants_1.migrationProgramId);
     return migrationAuthority;
 };
 exports.getMigrationAuthorityPda = getMigrationAuthorityPda;
 const getWhitelistMintPda = (mint, group) => {
     const migrationAuthority = (0, exports.getMigrationAuthorityPda)(group);
-    const [migrationMint] = web3_js_1.PublicKey.findProgramAddressSync([new web3_js_1.PublicKey(mint).toBuffer(), migrationAuthority.toBuffer()], constants_1.wnsProgramId);
+    const [migrationMint] = web3_js_1.PublicKey.findProgramAddressSync([new web3_js_1.PublicKey(mint).toBuffer(), migrationAuthority.toBuffer()], constants_1.migrationProgramId);
     return migrationMint;
 };
 exports.getWhitelistMintPda = getWhitelistMintPda;

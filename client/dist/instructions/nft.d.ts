@@ -11,5 +11,6 @@ export type MigrateMintArgs = {
     group: string;
     owner: string;
     metaplexCollection: string;
+    wnsNft: string;
 };
 export declare const getMigrateMintIx: (provider: Provider, args: MigrateMintArgs) => Promise<TransactionInstruction>;

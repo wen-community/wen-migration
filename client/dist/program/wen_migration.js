@@ -29,7 +29,7 @@ exports.IDL = {
                 {
                     "name": "wnsGroupMint",
                     "isMut": true,
-                    "isSigner": false
+                    "isSigner": true
                 },
                 {
                     "name": "wnsGroupMintTokenAccount",
@@ -69,10 +69,20 @@ exports.IDL = {
             ],
             "args": [
                 {
-                    "name": "args",
-                    "type": {
-                        "defined": "wen_new_standard::CreateGroupAccountArgs"
-                    }
+                    "name": "name",
+                    "type": "string"
+                },
+                {
+                    "name": "symbol",
+                    "type": "string"
+                },
+                {
+                    "name": "uri",
+                    "type": "string"
+                },
+                {
+                    "name": "maxSize",
+                    "type": "u32"
                 },
                 {
                     "name": "royalties",
@@ -124,7 +134,7 @@ exports.IDL = {
                 },
                 {
                     "name": "migrationAuthorityPda",
-                    "isMut": false,
+                    "isMut": true,
                     "isSigner": false
                 },
                 {
@@ -133,13 +143,8 @@ exports.IDL = {
                     "isSigner": false
                 },
                 {
-                    "name": "metaplexCollection",
-                    "isMut": false,
-                    "isSigner": false
-                },
-                {
                     "name": "metaplexCollectionMetadata",
-                    "isMut": false,
+                    "isMut": true,
                     "isSigner": false
                 },
                 {
@@ -154,17 +159,22 @@ exports.IDL = {
                 },
                 {
                     "name": "metaplexNftMetadata",
-                    "isMut": false,
+                    "isMut": true,
+                    "isSigner": false
+                },
+                {
+                    "name": "metaplexNftEdition",
+                    "isMut": true,
                     "isSigner": false
                 },
                 {
                     "name": "metaplexNftMasterEdition",
-                    "isMut": false,
+                    "isMut": true,
                     "isSigner": false
                 },
                 {
                     "name": "metaplexNftTokenRecord",
-                    "isMut": false,
+                    "isMut": true,
                     "isSigner": false
                 },
                 {
@@ -174,27 +184,27 @@ exports.IDL = {
                 },
                 {
                     "name": "wnsGroup",
-                    "isMut": false,
+                    "isMut": true,
                     "isSigner": false
                 },
                 {
                     "name": "wnsNftMint",
-                    "isMut": false,
-                    "isSigner": false
+                    "isMut": true,
+                    "isSigner": true
                 },
                 {
                     "name": "wnsNftToken",
-                    "isMut": false,
+                    "isMut": true,
                     "isSigner": false
                 },
                 {
                     "name": "wnsNftMemberAccount",
-                    "isMut": false,
+                    "isMut": true,
                     "isSigner": false
                 },
                 {
                     "name": "extraMetasAccount",
-                    "isMut": false,
+                    "isMut": true,
                     "isSigner": false
                 },
                 {

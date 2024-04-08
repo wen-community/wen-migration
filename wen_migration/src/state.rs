@@ -5,6 +5,7 @@ use anchor_lang::prelude::*;
 pub struct MigrationMintPda {}
 
 #[account()]
+#[derive(InitSpace)]
 pub struct MigrationAuthorityPda {
     pub wns_group: Pubkey,
     pub authority: Pubkey,

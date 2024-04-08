@@ -3,7 +3,7 @@ import {
 	utils,
 } from '@coral-xyz/anchor';
 import {Connection, PublicKey} from '@solana/web3.js';
-import {wnsProgramId, tokenProgramId, mplTokenProgramId} from './constants';
+import {wnsProgramId, mplTokenProgramId, migrationProgramId, token22ProgramId, tokenTradProgramId} from './constants';
 import {ASSOCIATED_TOKEN_PROGRAM_ID} from '@solana/spl-token';
 import {type WenMigration, migrationIdl} from '../program';
 
@@ -16,7 +16,7 @@ export const getProvider = () => {
 
 export const getMigrationProgram = (provider: Provider) => new Program(
 	migrationIdl as Idl,
-	wnsProgramId,
+	migrationProgramId,
 	provider,
 ) as unknown as Program<WenMigration>;
 
@@ -31,20 +31,25 @@ export const getGroupAccountPda = (mint: string) => {
 	return groupAccount;
 };
 
-export const getAtaAddress = (mint: string, owner: string): PublicKey => getProgramAddress(
-	[new PublicKey(owner).toBuffer(), tokenProgramId.toBuffer(), new PublicKey(mint).toBuffer()],
+export const getMetaplexAtaAddress = (mint: string, owner: string): PublicKey => getProgramAddress(
+	[new PublicKey(owner).toBuffer(), tokenTradProgramId.toBuffer(), new PublicKey(mint).toBuffer()],
+	ASSOCIATED_TOKEN_PROGRAM_ID,
+);
+
+export const getWnsAtaAddress = (mint: string, owner: string): PublicKey => getProgramAddress(
+	[new PublicKey(owner).toBuffer(), token22ProgramId.toBuffer(), new PublicKey(mint).toBuffer()],
 	ASSOCIATED_TOKEN_PROGRAM_ID,
 );
 
 export const getMigrationAuthorityPda = (group: string) => {
-	const [migrationAuthority] = PublicKey.findProgramAddressSync([new PublicKey(group).toBuffer()], wnsProgramId);
+	const [migrationAuthority] = PublicKey.findProgramAddressSync([new PublicKey(group).toBuffer()], migrationProgramId);
 
 	return migrationAuthority;
 };
 
 export const getWhitelistMintPda = (mint: string, group: string) => {
 	const migrationAuthority = getMigrationAuthorityPda(group);
-	const [migrationMint] = PublicKey.findProgramAddressSync([new PublicKey(mint).toBuffer(), migrationAuthority.toBuffer()], wnsProgramId);
+	const [migrationMint] = PublicKey.findProgramAddressSync([new PublicKey(mint).toBuffer(), migrationAuthority.toBuffer()], migrationProgramId);
 
 	return migrationMint;
 };

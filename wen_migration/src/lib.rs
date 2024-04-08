@@ -9,7 +9,6 @@ pub use instructions::*;
 pub use state::*;
 
 declare_id!("Mgr8nJhQpzhC4mEnaqYvktGJRVEJPjXLhfGccLYTgFe");
-
 #[program]
 pub mod wen_migration {
 
@@ -18,10 +17,13 @@ pub mod wen_migration {
     /// create a new wns group account
     pub fn migrate_collection(
         ctx: Context<MigrateCollection>,
-        args: wen_new_standard::CreateGroupAccountArgs,
+        name: String,
+        symbol: String,
+        uri: String,
+        max_size: u32,
         royalties: bool,
     ) -> Result<()> {
-        instructions::collection::handler(ctx, args, royalties)
+        instructions::collection::handler(ctx, name, symbol, uri, max_size, royalties)
     }
 
     /// create a pda representing a migration mint

@@ -1,23 +1,23 @@
-/* eslint-disable @typescript-eslint/no-unsafe-assignment */
-/* eslint-disable @typescript-eslint/no-unsafe-call */
+
 import {
-	getAtaAddress,
 	getExtraMetasAccountPda,
 	getManagerAccountPda,
 	getMemberAccountPda,
+	getMetaplexAtaAddress,
 	getMetaplexMasterEdition,
 	getMetaplexMetadata,
 	getMetaplexTokenRecord,
 	getMigrationAuthorityPda,
 	getMigrationProgram,
 	getWhitelistMintPda,
+	getWnsAtaAddress,
 } from '../utils/core';
 import {
-	Keypair, SYSVAR_INSTRUCTIONS_PUBKEY, SYSVAR_RENT_PUBKEY, SystemProgram,
+	Keypair, PublicKey, SYSVAR_INSTRUCTIONS_PUBKEY, SYSVAR_RENT_PUBKEY, SystemProgram,
 	type TransactionInstruction,
 } from '@solana/web3.js';
 import {type Provider} from '@coral-xyz/anchor';
-import {mplTokenProgramId, tokenProgramId, wnsProgramId} from '../utils';
+import {mplTokenProgramId, token22ProgramId, tokenTradProgramId, wnsProgramId} from '../utils';
 import {ASSOCIATED_TOKEN_PROGRAM_ID, TOKEN_PROGRAM_ID} from '@solana/spl-token';
 export type WhitelsitMintArgs = {
 	metaplexMint: string;
@@ -49,19 +49,19 @@ export type MigrateMintArgs = {
 	group: string;
 	owner: string;
 	metaplexCollection: string;
+	wnsNft: string;
 };
 
 export const getMigrateMintIx = async (provider: Provider, args: MigrateMintArgs): Promise<TransactionInstruction> => {
-	const {owner, group, metaplexCollection, metaplexMint} = args;
+	const {owner, group, metaplexCollection, metaplexMint, wnsNft} = args;
 
 	const migrationProgram = getMigrationProgram(provider);
 	const migrationAuthorityPda = getMigrationAuthorityPda(group);
 	const migrationMintPda = getWhitelistMintPda(metaplexMint, group);
 	const manager = getManagerAccountPda();
 
-	const mintAta = getAtaAddress(args.metaplexMint, TOKEN_PROGRAM_ID.toString());
-
-	const wnsNftMint = new Keypair();
+	const mintAta = getMetaplexAtaAddress(args.metaplexMint, owner);
+	const wnsNftMint = new PublicKey(wnsNft);
 	const ix = await migrationProgram.methods
 		.migrateMint()
 		.accountsStrict({
@@ -70,25 +70,25 @@ export const getMigrateMintIx = async (provider: Provider, args: MigrateMintArgs
 			wnsManager: manager,
 			rent: SYSVAR_RENT_PUBKEY,
 			associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID,
-			tokenProgram: tokenProgramId,
+			tokenProgram: tokenTradProgramId,
 			systemProgram: SystemProgram.programId,
 			wnsProgram: wnsProgramId,
 			metaplexNftMint: metaplexMint,
 			migrationMintPda,
 			nftOwner: owner,
-			metaplexCollection,
 			metaplexCollectionMetadata: getMetaplexMetadata(metaplexCollection),
 			metaplexNftToken: mintAta,
 			metaplexNftMetadata: getMetaplexMetadata(metaplexMint),
+			metaplexNftEdition: getMetaplexMasterEdition(metaplexMint),
 			metaplexNftMasterEdition: getMetaplexMasterEdition(metaplexMint),
 			metaplexNftTokenRecord: getMetaplexTokenRecord(metaplexMint, mintAta.toString()),
-			wnsNftMint: wnsNftMint.publicKey,
-			wnsNftToken: getAtaAddress(wnsNftMint.publicKey.toString(), tokenProgramId.toString()),
-			wnsNftMemberAccount: getMemberAccountPda(wnsNftMint.publicKey.toString()),
-			extraMetasAccount: getExtraMetasAccountPda(args.metaplexMint),
+			wnsNftMint,
+			wnsNftToken: getWnsAtaAddress(wnsNft, owner),
+			wnsNftMemberAccount: getMemberAccountPda(wnsNft),
+			extraMetasAccount: getExtraMetasAccountPda(wnsNft),
 			metaplexProgram: mplTokenProgramId,
 			sysvarInstructions: SYSVAR_INSTRUCTIONS_PUBKEY,
-			tokenProgram2022: tokenProgramId,
+			tokenProgram2022: token22ProgramId,
 		})
 		.instruction();
 	return ix;

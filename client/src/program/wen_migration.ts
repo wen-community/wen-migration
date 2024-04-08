@@ -26,7 +26,7 @@ export type WenMigration = {
         {
           "name": "wnsGroupMint",
           "isMut": true,
-          "isSigner": false
+          "isSigner": true
         },
         {
           "name": "wnsGroupMintTokenAccount",
@@ -66,10 +66,20 @@ export type WenMigration = {
       ],
       "args": [
         {
-          "name": "args",
-          "type": {
-            "defined": "wen_new_standard::CreateGroupAccountArgs"
-          }
+          "name": "name",
+          "type": "string"
+        },
+        {
+          "name": "symbol",
+          "type": "string"
+        },
+        {
+          "name": "uri",
+          "type": "string"
+        },
+        {
+          "name": "maxSize",
+          "type": "u32"
         },
         {
           "name": "royalties",
@@ -121,7 +131,7 @@ export type WenMigration = {
         },
         {
           "name": "migrationAuthorityPda",
-          "isMut": false,
+          "isMut": true,
           "isSigner": false
         },
         {
@@ -130,13 +140,8 @@ export type WenMigration = {
           "isSigner": false
         },
         {
-          "name": "metaplexCollection",
-          "isMut": false,
-          "isSigner": false
-        },
-        {
           "name": "metaplexCollectionMetadata",
-          "isMut": false,
+          "isMut": true,
           "isSigner": false
         },
         {
@@ -151,17 +156,22 @@ export type WenMigration = {
         },
         {
           "name": "metaplexNftMetadata",
-          "isMut": false,
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "metaplexNftEdition",
+          "isMut": true,
           "isSigner": false
         },
         {
           "name": "metaplexNftMasterEdition",
-          "isMut": false,
+          "isMut": true,
           "isSigner": false
         },
         {
           "name": "metaplexNftTokenRecord",
-          "isMut": false,
+          "isMut": true,
           "isSigner": false
         },
         {
@@ -171,27 +181,27 @@ export type WenMigration = {
         },
         {
           "name": "wnsGroup",
-          "isMut": false,
+          "isMut": true,
           "isSigner": false
         },
         {
           "name": "wnsNftMint",
-          "isMut": false,
-          "isSigner": false
+          "isMut": true,
+          "isSigner": true
         },
         {
           "name": "wnsNftToken",
-          "isMut": false,
+          "isMut": true,
           "isSigner": false
         },
         {
           "name": "wnsNftMemberAccount",
-          "isMut": false,
+          "isMut": true,
           "isSigner": false
         },
         {
           "name": "extraMetasAccount",
-          "isMut": false,
+          "isMut": true,
           "isSigner": false
         },
         {
@@ -317,7 +327,7 @@ export const IDL: WenMigration = {
         {
           "name": "wnsGroupMint",
           "isMut": true,
-          "isSigner": false
+          "isSigner": true
         },
         {
           "name": "wnsGroupMintTokenAccount",
@@ -357,10 +367,20 @@ export const IDL: WenMigration = {
       ],
       "args": [
         {
-          "name": "args",
-          "type": {
-            "defined": "wen_new_standard::CreateGroupAccountArgs"
-          }
+          "name": "name",
+          "type": "string"
+        },
+        {
+          "name": "symbol",
+          "type": "string"
+        },
+        {
+          "name": "uri",
+          "type": "string"
+        },
+        {
+          "name": "maxSize",
+          "type": "u32"
         },
         {
           "name": "royalties",
@@ -412,7 +432,7 @@ export const IDL: WenMigration = {
         },
         {
           "name": "migrationAuthorityPda",
-          "isMut": false,
+          "isMut": true,
           "isSigner": false
         },
         {
@@ -421,13 +441,8 @@ export const IDL: WenMigration = {
           "isSigner": false
         },
         {
-          "name": "metaplexCollection",
-          "isMut": false,
-          "isSigner": false
-        },
-        {
           "name": "metaplexCollectionMetadata",
-          "isMut": false,
+          "isMut": true,
           "isSigner": false
         },
         {
@@ -442,17 +457,22 @@ export const IDL: WenMigration = {
         },
         {
           "name": "metaplexNftMetadata",
-          "isMut": false,
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "metaplexNftEdition",
+          "isMut": true,
           "isSigner": false
         },
         {
           "name": "metaplexNftMasterEdition",
-          "isMut": false,
+          "isMut": true,
           "isSigner": false
         },
         {
           "name": "metaplexNftTokenRecord",
-          "isMut": false,
+          "isMut": true,
           "isSigner": false
         },
         {
@@ -462,27 +482,27 @@ export const IDL: WenMigration = {
         },
         {
           "name": "wnsGroup",
-          "isMut": false,
+          "isMut": true,
           "isSigner": false
         },
         {
           "name": "wnsNftMint",
-          "isMut": false,
-          "isSigner": false
+          "isMut": true,
+          "isSigner": true
         },
         {
           "name": "wnsNftToken",
-          "isMut": false,
+          "isMut": true,
           "isSigner": false
         },
         {
           "name": "wnsNftMemberAccount",
-          "isMut": false,
+          "isMut": true,
           "isSigner": false
         },
         {
           "name": "extraMetasAccount",
-          "isMut": false,
+          "isMut": true,
           "isSigner": false
         },
         {

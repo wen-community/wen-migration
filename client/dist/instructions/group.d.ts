@@ -6,5 +6,6 @@ export type CreateGroupArgs = {
     uri: string;
     maxSize: number;
     royalties: boolean;
+    group: string;
 };
 export declare const getMigrateCollectionIx: (provider: Provider, args: CreateGroupArgs) => Promise<import("@solana/web3.js").TransactionInstruction>;
