@@ -10,15 +10,15 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.getMigrateMintIx = exports.getWhitelistMintIx = void 0;
-const core_1 = require("../utils/core");
-const web3_js_1 = require("@solana/web3.js");
 const utils_1 = require("../utils");
+const web3_js_1 = require("@solana/web3.js");
+const utils_2 = require("../utils");
 const spl_token_1 = require("@solana/spl-token");
 const getWhitelistMintIx = (provider, args) => __awaiter(void 0, void 0, void 0, function* () {
     const { authority, group, metaplexMint } = args;
-    const migrationProgram = (0, core_1.getMigrationProgram)(provider);
-    const migrationAuthorityPda = (0, core_1.getMigrationAuthorityPda)(group);
-    const migrationMintPda = (0, core_1.getWhitelistMintPda)(metaplexMint, group);
+    const migrationProgram = (0, utils_1.getMigrationProgram)(provider);
+    const migrationAuthorityPda = (0, utils_1.getMigrationAuthorityPda)(group);
+    const migrationMintPda = (0, utils_1.getWhitelistMintPda)(metaplexMint, group);
     const ix = yield migrationProgram.methods
         .whitelistMint()
         .accountsStrict({
@@ -33,40 +33,44 @@ const getWhitelistMintIx = (provider, args) => __awaiter(void 0, void 0, void 0,
 });
 exports.getWhitelistMintIx = getWhitelistMintIx;
 const getMigrateMintIx = (provider, args) => __awaiter(void 0, void 0, void 0, function* () {
-    const { owner, group, metaplexCollection, metaplexMint, wnsNft } = args;
-    const migrationProgram = (0, core_1.getMigrationProgram)(provider);
-    const migrationAuthorityPda = (0, core_1.getMigrationAuthorityPda)(group);
-    const migrationMintPda = (0, core_1.getWhitelistMintPda)(metaplexMint, group);
-    const manager = (0, core_1.getManagerAccountPda)();
-    const mintAta = (0, core_1.getMetaplexAtaAddress)(args.metaplexMint, owner);
+    const { owner, group, metaplexCollection, metaplexMint, wnsNft, rewardMint } = args;
+    const migrationProgram = (0, utils_1.getMigrationProgram)(provider);
+    const migrationAuthorityPda = (0, utils_1.getMigrationAuthorityPda)(group);
+    const migrationMintPda = (0, utils_1.getWhitelistMintPda)(metaplexMint, group);
+    const manager = (0, utils_1.getManagerAccountPda)();
+    const mintAta = (0, utils_1.getMetaplexAtaAddress)(args.metaplexMint, owner);
     const wnsNftMint = new web3_js_1.PublicKey(wnsNft);
     const ix = yield migrationProgram.methods
         .migrateMint()
         .accountsStrict({
+        userMigrationTracker: (0, utils_1.getUserMigrationTrackerPda)(owner),
         migrationAuthorityPda,
         wnsGroup: group,
         wnsManager: manager,
         rent: web3_js_1.SYSVAR_RENT_PUBKEY,
         associatedTokenProgram: spl_token_1.ASSOCIATED_TOKEN_PROGRAM_ID,
-        tokenProgram: utils_1.tokenTradProgramId,
+        tokenProgram: utils_2.tokenTradProgramId,
         systemProgram: web3_js_1.SystemProgram.programId,
-        wnsProgram: utils_1.wnsProgramId,
+        wnsProgram: utils_2.wnsProgramId,
         metaplexNftMint: metaplexMint,
         migrationMintPda,
         nftOwner: owner,
-        metaplexCollectionMetadata: (0, core_1.getMetaplexMetadata)(metaplexCollection),
+        metaplexCollectionMetadata: (0, utils_1.getMetaplexMetadata)(metaplexCollection),
         metaplexNftToken: mintAta,
-        metaplexNftMetadata: (0, core_1.getMetaplexMetadata)(metaplexMint),
-        metaplexNftEdition: (0, core_1.getMetaplexMasterEdition)(metaplexMint),
-        metaplexNftMasterEdition: (0, core_1.getMetaplexMasterEdition)(metaplexMint),
-        metaplexNftTokenRecord: (0, core_1.getMetaplexTokenRecord)(metaplexMint, mintAta.toString()),
+        metaplexNftMetadata: (0, utils_1.getMetaplexMetadata)(metaplexMint),
+        metaplexNftEdition: (0, utils_1.getMetaplexMasterEdition)(metaplexMint),
+        metaplexNftMasterEdition: (0, utils_1.getMetaplexMasterEdition)(metaplexMint),
+        metaplexNftTokenRecord: (0, utils_1.getMetaplexTokenRecord)(metaplexMint, mintAta.toString()),
         wnsNftMint,
-        wnsNftToken: (0, core_1.getWnsAtaAddress)(wnsNft, owner),
-        wnsNftMemberAccount: (0, core_1.getMemberAccountPda)(wnsNft),
-        extraMetasAccount: (0, core_1.getExtraMetasAccountPda)(wnsNft),
-        metaplexProgram: utils_1.mplTokenProgramId,
-        sysvarInstructions: web3_js_1.SYSVAR_INSTRUCTIONS_PUBKEY,
-        tokenProgram2022: utils_1.token22ProgramId,
+        wnsNftToken: (0, utils_1.getWnsAtaAddress)(wnsNft, owner),
+        wnsNftMemberAccount: (0, utils_1.getMemberAccountPda)(wnsNft),
+        extraMetasAccount: (0, utils_1.getExtraMetasAccountPda)(wnsNft),
+        metaplexProgram: utils_2.mplTokenProgramId,
+        instructionsProgram: web3_js_1.SYSVAR_INSTRUCTIONS_PUBKEY,
+        tokenProgram2022: utils_2.token22ProgramId,
+        rewardMint,
+        rewardUserTa: (0, utils_1.getMetaplexAtaAddress)(rewardMint, owner),
+        rewardProgramTa: (0, utils_1.getMetaplexAtaAddress)(rewardMint, migrationAuthorityPda.toString())
     })
         .instruction();
     return ix;

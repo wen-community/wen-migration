@@ -55,7 +55,6 @@ impl<'info> MigrateCollection<'info> {
             mint_token_account: self.wns_group_mint_token_account.to_account_info(),
             manager: self.wns_manager.to_account_info(),
             system_program: self.system_program.to_account_info(),
-            rent: self.rent.to_account_info(),
             associated_token_program: self.associated_token_program.to_account_info(),
             token_program: self.token_program.to_account_info(),
         };

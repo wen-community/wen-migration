@@ -53,3 +53,23 @@ export const getMigrateCollectionIx = async (provider: Provider, args: CreateGro
 
 	return ix;
 };
+
+export const getUpdateCollectionIx = async (provider: Provider, groupMint: string, amount: number) => {
+	const migrationProgram = getMigrationProgram(provider);
+	const group = getGroupAccountPda(groupMint);
+	const migrationAuthorityPda = getMigrationAuthorityPda(group.toString());
+	const authority = provider.publicKey ?? PublicKey.default;
+	const amountPerMint = new BN(amount) as BN;
+
+	const ix = await migrationProgram.methods
+		.updateCollection(amountPerMint)
+		.accountsStrict({
+			systemProgram: SystemProgram.programId,
+			collectionAuthority: authority,
+			wnsGroup: group,
+			migrationAuthorityPda,
+		})
+		.instruction();
+
+	return ix;
+};

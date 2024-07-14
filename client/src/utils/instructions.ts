@@ -8,7 +8,7 @@ import {type AnchorProvider} from '@coral-xyz/anchor';
         provider: anchor provider
         nfts
 */
-export const getMigrateNftsIx = async (provider: AnchorProvider, nfts: MetaplexNftData[], wnsNfts: string[], group: string) => {
+export const getMigrateNftsIx = async (provider: AnchorProvider, nfts: MetaplexNftData[], wnsNfts: string[], group: string, rewardMint: string) => {
 	const owner = provider.wallet.publicKey.toString();
 	const ixs: Array<Promise<TransactionInstruction>> = [];
 	let i = 0;
@@ -22,6 +22,7 @@ export const getMigrateNftsIx = async (provider: AnchorProvider, nfts: MetaplexN
 			metaplexCollection: collection,
 			metaplexMint: mint,
 			wnsNft,
+			rewardMint
 		});
 		i++;
 		ixs.push(migrateIx);

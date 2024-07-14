@@ -9,7 +9,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getMigrateCollectionIx = void 0;
+exports.getUpdateCollectionIx = exports.getMigrateCollectionIx = void 0;
 const spl_token_1 = require("@solana/spl-token");
 const constants_1 = require("../utils/constants");
 const core_1 = require("../utils/core");
@@ -42,4 +42,23 @@ const getMigrateCollectionIx = (provider, args) => __awaiter(void 0, void 0, voi
     return ix;
 });
 exports.getMigrateCollectionIx = getMigrateCollectionIx;
+const getUpdateCollectionIx = (provider, groupMint, amount) => __awaiter(void 0, void 0, void 0, function* () {
+    var _a;
+    const migrationProgram = (0, core_1.getMigrationProgram)(provider);
+    const group = (0, core_1.getGroupAccountPda)(groupMint);
+    const migrationAuthorityPda = (0, core_1.getMigrationAuthorityPda)(group.toString());
+    const authority = (_a = provider.publicKey) !== null && _a !== void 0 ? _a : web3_js_1.PublicKey.default;
+    const amountPerMint = new anchor_1.BN(amount);
+    const ix = yield migrationProgram.methods
+        .updateCollection(amountPerMint)
+        .accountsStrict({
+        systemProgram: web3_js_1.SystemProgram.programId,
+        collectionAuthority: authority,
+        wnsGroup: group,
+        migrationAuthorityPda,
+    })
+        .instruction();
+    return ix;
+});
+exports.getUpdateCollectionIx = getUpdateCollectionIx;
 //# sourceMappingURL=group.js.map

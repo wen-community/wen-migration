@@ -26,6 +26,14 @@ pub mod wen_migration {
         instructions::collection::handler(ctx, name, symbol, uri, max_size, royalties)
     }
 
+    /// create a new wns group account
+    pub fn update_collection(
+        ctx: Context<UpdateCollection>,
+        amount_per_mint: u64,
+    ) -> Result<()> {
+        instructions::update_collection::handler(ctx, amount_per_mint)
+    }
+
     /// create a pda representing a migration mint
     pub fn whitelist_mint(_ctx: Context<WhitelistMint>) -> Result<()> {
         // empty function because pda is created in the instruction

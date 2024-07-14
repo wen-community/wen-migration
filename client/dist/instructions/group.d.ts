@@ -1,4 +1,3 @@
-/// <reference types="@solana/web3.js" />
 import { type Provider } from '@coral-xyz/anchor';
 export type CreateGroupArgs = {
     name: string;
@@ -9,3 +8,4 @@ export type CreateGroupArgs = {
     group: string;
 };
 export declare const getMigrateCollectionIx: (provider: Provider, args: CreateGroupArgs) => Promise<import("@solana/web3.js").TransactionInstruction>;
+export declare const getUpdateCollectionIx: (provider: Provider, groupMint: string, amount: number) => Promise<import("@solana/web3.js").TransactionInstruction>;
