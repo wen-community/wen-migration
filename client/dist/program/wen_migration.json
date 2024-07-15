@@ -54,11 +54,11 @@
                     "writable": true
                 },
                 {
-                    "name": "wns_manager"
+                    "name": "reward_mint",
+                    "writable": true
                 },
                 {
-                    "name": "rent",
-                    "address": "SysvarRent111111111111111111111111111111111"
+                    "name": "wns_manager"
                 },
                 {
                     "name": "associated_token_program",
@@ -97,6 +97,10 @@
                 {
                     "name": "royalties",
                     "type": "bool"
+                },
+                {
+                    "name": "reward_amount",
+                    "type": "u64"
                 }
             ]
         },

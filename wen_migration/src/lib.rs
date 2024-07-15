@@ -22,8 +22,9 @@ pub mod wen_migration {
         uri: String,
         max_size: u32,
         royalties: bool,
+        reward_amount: u64
     ) -> Result<()> {
-        instructions::collection::handler(ctx, name, symbol, uri, max_size, royalties)
+        instructions::collection::handler(ctx, name, symbol, uri, max_size, royalties, reward_amount)
     }
 
     /// create a new wns group account

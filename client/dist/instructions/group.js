@@ -23,11 +23,11 @@ const getMigrateCollectionIx = (provider, args) => __awaiter(void 0, void 0, voi
     const migrationAuthorityPda = (0, core_1.getMigrationAuthorityPda)(group.toString());
     const authority = (_a = provider.publicKey) !== null && _a !== void 0 ? _a : web3_js_1.PublicKey.default;
     const collectionSize = new anchor_1.BN(args.maxSize);
+    const rewardAmount = new anchor_1.BN(args.rewardAmount);
     const ix = yield migrationProgram.methods
-        .migrateCollection(args.name, args.symbol, args.uri, collectionSize, args.royalties)
+        .migrateCollection(args.name, args.symbol, args.uri, collectionSize, args.royalties, rewardAmount)
         .accountsStrict({
         systemProgram: web3_js_1.SystemProgram.programId,
-        rent: web3_js_1.SYSVAR_RENT_PUBKEY,
         associatedTokenProgram: spl_token_1.ASSOCIATED_TOKEN_PROGRAM_ID,
         tokenProgram: constants_1.token22ProgramId,
         collectionAuthority: authority,
@@ -35,6 +35,7 @@ const getMigrateCollectionIx = (provider, args) => __awaiter(void 0, void 0, voi
         wnsGroupMint: groupMint,
         wnsGroupMintTokenAccount: (0, core_1.getWnsAtaAddress)(args.group, authority.toString()),
         wnsManager: (0, core_1.getManagerAccountPda)(),
+        rewardMint: args.rewardMint,
         wnsProgram: constants_1.wnsProgramId,
         migrationAuthorityPda,
     })

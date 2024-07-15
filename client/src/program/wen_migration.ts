@@ -60,11 +60,11 @@ export type WenMigration = {
           "writable": true
         },
         {
-          "name": "wnsManager"
+          "name": "rewardMint",
+          "writable": true
         },
         {
-          "name": "rent",
-          "address": "SysvarRent111111111111111111111111111111111"
+          "name": "wnsManager"
         },
         {
           "name": "associatedTokenProgram",
@@ -103,6 +103,10 @@ export type WenMigration = {
         {
           "name": "royalties",
           "type": "bool"
+        },
+        {
+          "name": "rewardAmount",
+          "type": "u64"
         }
       ]
     },
