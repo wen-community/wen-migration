@@ -2705,7 +2705,7 @@ dependencies = [
  "anchor-lang",
  "anchor-spl",
  "mpl-token-metadata",
- "spl-pod 0.1.1",
+ "spl-pod 0.2.5",
  "spl-tlv-account-resolution 0.4.0",
  "spl-transfer-hook-interface 0.5.1",
  "wen_new_standard",
@@ -2714,7 +2714,7 @@ dependencies = [
 [[package]]
 name = "wen_new_standard"
 version = "0.4.2-alpha"
-source = "git+https://github.com/wen-community/wen-new-standard?branch=no_kinobi#206bf7def3de4f1439dc777cda95cf520986535c"
+source = "git+https://github.com/wen-community/wen-program-library?branch=no_kinobi#09719fda6205b1db797dd30ef027fefa3e74d14e"
 dependencies = [
  "anchor-lang",
  "anchor-spl",
@@ -2726,7 +2726,7 @@ dependencies = [
 [[package]]
 name = "wen_royalty_distribution"
 version = "0.2.0-alpha"
-source = "git+https://github.com/wen-community/wen-new-standard?branch=no_kinobi#206bf7def3de4f1439dc777cda95cf520986535c"
+source = "git+https://github.com/wen-community/wen-program-library?branch=no_kinobi#09719fda6205b1db797dd30ef027fefa3e74d14e"
 dependencies = [
  "anchor-lang",
  "anchor-spl",
