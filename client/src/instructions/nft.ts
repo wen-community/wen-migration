@@ -9,9 +9,10 @@ import {
 	getMetaplexTokenRecord,
 	getMigrationAuthorityPda,
 	getMigrationProgram,
+	getUserMigrationTrackerPda,
 	getWhitelistMintPda,
 	getWnsAtaAddress,
-} from '../utils/core';
+} from '../utils';
 import {
 	Keypair, PublicKey, SYSVAR_INSTRUCTIONS_PUBKEY, SYSVAR_RENT_PUBKEY, SystemProgram,
 	type TransactionInstruction,
@@ -50,10 +51,11 @@ export type MigrateMintArgs = {
 	owner: string;
 	metaplexCollection: string;
 	wnsNft: string;
+	rewardMint: string;
 };
 
 export const getMigrateMintIx = async (provider: Provider, args: MigrateMintArgs): Promise<TransactionInstruction> => {
-	const {owner, group, metaplexCollection, metaplexMint, wnsNft} = args;
+	const {owner, group, metaplexCollection, metaplexMint, wnsNft, rewardMint} = args;
 
 	const migrationProgram = getMigrationProgram(provider);
 	const migrationAuthorityPda = getMigrationAuthorityPda(group);
@@ -65,6 +67,7 @@ export const getMigrateMintIx = async (provider: Provider, args: MigrateMintArgs
 	const ix = await migrationProgram.methods
 		.migrateMint()
 		.accountsStrict({
+			userMigrationTracker: getUserMigrationTrackerPda(owner),
 			migrationAuthorityPda,
 			wnsGroup: group,
 			wnsManager: manager,
@@ -87,8 +90,11 @@ export const getMigrateMintIx = async (provider: Provider, args: MigrateMintArgs
 			wnsNftMemberAccount: getMemberAccountPda(wnsNft),
 			extraMetasAccount: getExtraMetasAccountPda(wnsNft),
 			metaplexProgram: mplTokenProgramId,
-			sysvarInstructions: SYSVAR_INSTRUCTIONS_PUBKEY,
+			instructionsProgram: SYSVAR_INSTRUCTIONS_PUBKEY,
 			tokenProgram2022: token22ProgramId,
+			rewardMint,
+			rewardUserTa: getMetaplexAtaAddress(rewardMint, owner),
+			rewardProgramTa: getMetaplexAtaAddress(rewardMint, migrationAuthorityPda.toString())
 		})
 		.instruction();
 	return ix;

@@ -16,7 +16,6 @@ export const getProvider = () => {
 
 export const getMigrationProgram = (provider: Provider) => new Program(
 	migrationIdl as Idl,
-	migrationProgramId,
 	provider,
 ) as unknown as Program<WenMigration>;
 
@@ -52,6 +51,12 @@ export const getWhitelistMintPda = (mint: string, group: string) => {
 	const [migrationMint] = PublicKey.findProgramAddressSync([new PublicKey(mint).toBuffer(), migrationAuthority.toBuffer()], migrationProgramId);
 
 	return migrationMint;
+};
+
+export const getUserMigrationTrackerPda = (user: string) => {
+	const [userTracker] = PublicKey.findProgramAddressSync([new PublicKey(user).toBuffer()], migrationProgramId);
+
+	return userTracker;
 };
 
 export const getManagerAccountPda = () => {

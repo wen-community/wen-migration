@@ -1,6 +1,6 @@
 {
     "name": "@wen-foundation/wns-migration-sdk",
-    "version": "1.0.1-alpha",
+    "version": "1.0.3-alpha",
     "description": "Wen New Standard Migration SDK",
     "license": "(MIT OR Apache-2.0)",
     "homepage": "https://github.com/wen-foundation/wen-migration#readme",
@@ -16,7 +16,7 @@
         "build": "tsc"
     },
     "dependencies": {
-        "@coral-xyz/anchor": "^0.29.0",
+        "@coral-xyz/anchor": "^0.30.1",
         "@metaplex-foundation/js": "^0.20.1",
         "@solana/spl-token": "^0.3.11",
         "@solana/web3.js": "^1.89.0"

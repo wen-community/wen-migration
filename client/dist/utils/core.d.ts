@@ -9,6 +9,7 @@ export declare const getMetaplexAtaAddress: (mint: string, owner: string) => Pub
 export declare const getWnsAtaAddress: (mint: string, owner: string) => PublicKey;
 export declare const getMigrationAuthorityPda: (group: string) => PublicKey;
 export declare const getWhitelistMintPda: (mint: string, group: string) => PublicKey;
+export declare const getUserMigrationTrackerPda: (user: string) => PublicKey;
 export declare const getManagerAccountPda: () => PublicKey;
 export declare const getMemberAccountPda: (mint: string) => PublicKey;
 export declare const getExtraMetasAccountPda: (mint: string) => PublicKey;

@@ -31,9 +31,11 @@ pub struct MigrateCollection<'info> {
     #[account(mut)]
     /// CHECK: cpi checks
     pub wns_group_mint_token_account: UncheckedAccount<'info>,
+    #[account(mut)]
+    /// CHECK: any token
+    pub reward_mint: UncheckedAccount<'info>,
     /// CHECK: cpi checks
     pub wns_manager: UncheckedAccount<'info>,
-    pub rent: Sysvar<'info, Rent>,
     pub associated_token_program: Program<'info, AssociatedToken>,
     pub token_program: Program<'info, Token2022>,
     pub system_program: Program<'info, System>,
@@ -55,7 +57,6 @@ impl<'info> MigrateCollection<'info> {
             mint_token_account: self.wns_group_mint_token_account.to_account_info(),
             manager: self.wns_manager.to_account_info(),
             system_program: self.system_program.to_account_info(),
-            rent: self.rent.to_account_info(),
             associated_token_program: self.associated_token_program.to_account_info(),
             token_program: self.token_program.to_account_info(),
         };
@@ -72,11 +73,14 @@ pub fn handler(
     uri: String,
     max_size: u32,
     royalties: bool,
+    reward_amount: u64,
 ) -> Result<()> {
     let migration_authority_pda = &mut ctx.accounts.migration_authority_pda;
     migration_authority_pda.authority = ctx.accounts.collection_authority.key();
     migration_authority_pda.wns_group = ctx.accounts.wns_group.key();
     migration_authority_pda.royalties = royalties;
+    migration_authority_pda.reward_mint = ctx.accounts.reward_mint.key();
+    migration_authority_pda.reward_per_migration = reward_amount;
 
     let wns_group = ctx.accounts.wns_group.key();
     let signer_seeds = [

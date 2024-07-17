@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getMetaplexMetadata = exports.getMetaplexMasterEdition = exports.getMetaplexTokenRecord = exports.getExtraMetasAccountPda = exports.getMemberAccountPda = exports.getManagerAccountPda = exports.getWhitelistMintPda = exports.getMigrationAuthorityPda = exports.getWnsAtaAddress = exports.getMetaplexAtaAddress = exports.getGroupAccountPda = exports.getProgramAddress = exports.getMigrationProgram = exports.getProvider = void 0;
+exports.getMetaplexMetadata = exports.getMetaplexMasterEdition = exports.getMetaplexTokenRecord = exports.getExtraMetasAccountPda = exports.getMemberAccountPda = exports.getManagerAccountPda = exports.getUserMigrationTrackerPda = exports.getWhitelistMintPda = exports.getMigrationAuthorityPda = exports.getWnsAtaAddress = exports.getMetaplexAtaAddress = exports.getGroupAccountPda = exports.getProgramAddress = exports.getMigrationProgram = exports.getProvider = void 0;
 const anchor_1 = require("@coral-xyz/anchor");
 const web3_js_1 = require("@solana/web3.js");
 const constants_1 = require("./constants");
@@ -14,7 +14,7 @@ const getProvider = () => {
     return provider;
 };
 exports.getProvider = getProvider;
-const getMigrationProgram = (provider) => new anchor_1.Program(program_1.migrationIdl, constants_1.migrationProgramId, provider);
+const getMigrationProgram = (provider) => new anchor_1.Program(program_1.migrationIdl, provider);
 exports.getMigrationProgram = getMigrationProgram;
 const getProgramAddress = (seeds, programId) => {
     const [key] = web3_js_1.PublicKey.findProgramAddressSync(seeds, programId);
@@ -41,6 +41,11 @@ const getWhitelistMintPda = (mint, group) => {
     return migrationMint;
 };
 exports.getWhitelistMintPda = getWhitelistMintPda;
+const getUserMigrationTrackerPda = (user) => {
+    const [userTracker] = web3_js_1.PublicKey.findProgramAddressSync([new web3_js_1.PublicKey(user).toBuffer()], constants_1.migrationProgramId);
+    return userTracker;
+};
+exports.getUserMigrationTrackerPda = getUserMigrationTrackerPda;
 const getManagerAccountPda = () => {
     const [managerAccount] = web3_js_1.PublicKey.findProgramAddressSync([anchor_1.utils.bytes.utf8.encode('manager')], constants_1.wnsProgramId);
     return managerAccount;

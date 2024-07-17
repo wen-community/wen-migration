@@ -1,8 +1,9 @@
-use anchor_lang::{prelude::*, solana_program::sysvar::instructions::ID as instructions_id};
+use anchor_lang::{prelude::*, solana_program::sysvar};
 use anchor_spl::{
     associated_token::AssociatedToken,
-    token::{Mint, Token, TokenAccount},
+    token::{transfer, Mint, Token, Transfer},
     token_2022::Token2022,
+    token_interface::TokenAccount,
 };
 use mpl_token_metadata::{accounts::Metadata, instructions::BurnCpiBuilder, types::BurnArgs};
 use wen_new_standard::{
@@ -12,12 +13,21 @@ use wen_new_standard::{
     }, get_bump_in_seed_form, program::WenNewStandard, CreateMintAccountArgs, CreatorWithShare, UpdateRoyaltiesArgs
 };
 
-use crate::{MigrationAuthorityPda, MigrationMintPda};
+use crate::{MigrationAuthorityPda, MigrationMintPda, UserTracker};
 
 #[derive(Accounts)]
 #[instruction()]
 pub struct MigrateMint<'info> {
+    #[account(mut)]
     pub nft_owner: Signer<'info>,
+    #[account(
+        init_if_needed,
+        space = 8 + UserTracker::INIT_SPACE,
+        payer = nft_owner,
+        seeds = [nft_owner.key().as_ref()],
+        bump
+    )]
+    pub user_migration_tracker: Account<'info, UserTracker>,
     #[account(
         mut,
         seeds = [wns_group.key().as_ref()],
@@ -36,8 +46,13 @@ pub struct MigrateMint<'info> {
     pub metaplex_collection_metadata: UncheckedAccount<'info>,
     #[account(mut)]
     pub metaplex_nft_mint: Account<'info, Mint>,
-    #[account(mut)]
-    pub metaplex_nft_token: Account<'info, TokenAccount>,
+    #[account(
+        mut, 
+        token::mint = metaplex_nft_mint, 
+        token::authority = nft_owner, 
+        token::token_program = token_program
+    )]
+    pub metaplex_nft_token: Box<InterfaceAccount<'info, TokenAccount>>,
     #[account(mut)]
     /// CHECK: cpi checks
     pub metaplex_nft_metadata: UncheckedAccount<'info>,
@@ -67,15 +82,29 @@ pub struct MigrateMint<'info> {
     #[account(mut)]
     /// CHECK: cpi checks
     pub extra_metas_account: UncheckedAccount<'info>,
+    #[account(constraint = reward_mint.key() == migration_authority_pda.reward_mint)]
+    pub reward_mint: Account<'info, Mint>,
+    #[account(
+        mut, 
+        token::mint = reward_mint, 
+        token::authority = nft_owner, 
+        token::token_program = token_program
+    )]
+    pub reward_user_ta: Box<InterfaceAccount<'info, TokenAccount>>,
+    #[account(
+        mut, 
+        token::mint = reward_mint, 
+        token::authority = migration_authority_pda, 
+        token::token_program = token_program
+    )]
+    pub reward_program_ta: Box<InterfaceAccount<'info, TokenAccount>>,
     /// CHECK: constraint check
     pub metaplex_program: UncheckedAccount<'info>,
     pub wns_program: Program<'info, WenNewStandard>,
     pub system_program: Program<'info, System>,
     /// CHECK: constraint check
-    #[account(
-        constraint = sysvar_instructions.key() == instructions_id
-    )]
-    pub sysvar_instructions: UncheckedAccount<'info>,
+    #[account(address = sysvar::instructions::id())]
+    pub instructions_program: UncheckedAccount<'info>,
     pub rent: Sysvar<'info, Rent>,
     pub associated_token_program: Program<'info, AssociatedToken>,
     pub token_program: Program<'info, Token>,
@@ -122,7 +151,7 @@ impl<'info> MigrateMint<'info> {
             .mint(&self.metaplex_nft_mint.to_account_info())
             .token(&self.metaplex_nft_token.to_account_info())
             .system_program(&self.system_program.to_account_info())
-            .sysvar_instructions(&self.sysvar_instructions.to_account_info())
+            .sysvar_instructions(&self.instructions_program.to_account_info())
             .spl_token_program(&self.token_program.to_account_info())
             .burn_args(BurnArgs::V1 { amount: 1 })
             .invoke()?;
@@ -138,7 +167,6 @@ impl<'info> MigrateMint<'info> {
             mint_token_account: self.wns_nft_token.to_account_info(),
             manager: self.wns_manager.to_account_info(),
             system_program: self.system_program.to_account_info(),
-            rent: self.rent.to_account_info(),
             associated_token_program: self.associated_token_program.to_account_info(),
             token_program: self.token_program_2022.to_account_info(),
         };
@@ -178,6 +206,19 @@ impl<'info> MigrateMint<'info> {
         let cpi_ctx = CpiContext::new_with_signer(cpi_program, cpi_accounts, signer_seeds);
         add_royalties(cpi_ctx, args)?;
         Ok(())
+    }
+
+    fn transfer_rewards(&self, signer_seeds: &[&[&[u8]]], amount: u64) -> Result<()> {
+        let cpi_ctx = CpiContext::new_with_signer(
+            self.token_program.to_account_info(),
+            Transfer {
+                from: self.reward_program_ta.to_account_info(),
+                to: self.reward_user_ta.to_account_info(),
+                authority: self.migration_authority_pda.to_account_info(),
+            },
+            signer_seeds,
+        );
+        transfer(cpi_ctx, amount)
     }
 }
 
@@ -222,6 +263,22 @@ pub fn handler(ctx: Context<MigrateMint>) -> Result<()> {
 
     // burn metaplex nft
     ctx.accounts.burn_metaplex_nft()?;
+
+    let user_migration_tracker = &mut ctx.accounts.user_migration_tracker;
+    let current_migrations = user_migration_tracker.migration_count;
+    user_migration_tracker.migration_count = current_migrations + 1;
+
+    let reward_amount = ctx.accounts.migration_authority_pda.reward_per_migration;
+    let reward_mint = ctx.accounts.reward_mint.key();
+
+    if reward_amount > 0 && reward_mint != ctx.accounts.system_program.key() {
+        let scaled_rewards = if current_migrations + 1 % 20 == 0 {
+            reward_amount * 20
+        } else {
+            reward_amount
+        };
+        ctx.accounts.transfer_rewards(&[&signer_seeds[..]], scaled_rewards)?;
+    }
 
     Ok(())
 }

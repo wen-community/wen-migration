@@ -1,67 +1,80 @@
 {
-    "version": "0.0.1-alpha",
-    "name": "wen_migration",
+    "address": "Mgr8nJhQpzhC4mEnaqYvktGJRVEJPjXLhfGccLYTgFe",
+    "metadata": {
+        "name": "wen_migration",
+        "version": "0.0.1-alpha",
+        "spec": "0.1.0",
+        "description": "Program for migrating from metaplex to WNS"
+    },
     "instructions": [
         {
-            "name": "migrateCollection",
+            "name": "migrate_collection",
             "docs": [
                 "create a new wns group account"
             ],
+            "discriminator": [
+                23,
+                210,
+                133,
+                21,
+                57,
+                239,
+                124,
+                148
+            ],
             "accounts": [
                 {
-                    "name": "collectionAuthority",
-                    "isMut": true,
-                    "isSigner": true
+                    "name": "collection_authority",
+                    "writable": true,
+                    "signer": true
                 },
                 {
-                    "name": "migrationAuthorityPda",
-                    "isMut": true,
-                    "isSigner": false
+                    "name": "migration_authority_pda",
+                    "writable": true,
+                    "pda": {
+                        "seeds": [
+                            {
+                                "kind": "account",
+                                "path": "wns_group"
+                            }
+                        ]
+                    }
                 },
                 {
-                    "name": "wnsGroup",
-                    "isMut": true,
-                    "isSigner": false
+                    "name": "wns_group",
+                    "writable": true
                 },
                 {
-                    "name": "wnsGroupMint",
-                    "isMut": true,
-                    "isSigner": true
+                    "name": "wns_group_mint",
+                    "writable": true,
+                    "signer": true
                 },
                 {
-                    "name": "wnsGroupMintTokenAccount",
-                    "isMut": true,
-                    "isSigner": false
+                    "name": "wns_group_mint_token_account",
+                    "writable": true
                 },
                 {
-                    "name": "wnsManager",
-                    "isMut": false,
-                    "isSigner": false
+                    "name": "reward_mint",
+                    "writable": true
                 },
                 {
-                    "name": "rent",
-                    "isMut": false,
-                    "isSigner": false
+                    "name": "wns_manager"
                 },
                 {
-                    "name": "associatedTokenProgram",
-                    "isMut": false,
-                    "isSigner": false
+                    "name": "associated_token_program",
+                    "address": "ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL"
                 },
                 {
-                    "name": "tokenProgram",
-                    "isMut": false,
-                    "isSigner": false
+                    "name": "token_program",
+                    "address": "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb"
                 },
                 {
-                    "name": "systemProgram",
-                    "isMut": false,
-                    "isSigner": false
+                    "name": "system_program",
+                    "address": "11111111111111111111111111111111"
                 },
                 {
-                    "name": "wnsProgram",
-                    "isMut": false,
-                    "isSigner": false
+                    "name": "wns_program",
+                    "address": "wns1gDLt8fgLcGhWi5MqAqgXpwEP1JftKE9eZnXS1HM"
                 }
             ],
             "args": [
@@ -78,171 +91,268 @@
                     "type": "string"
                 },
                 {
-                    "name": "maxSize",
+                    "name": "max_size",
                     "type": "u32"
                 },
                 {
                     "name": "royalties",
                     "type": "bool"
+                },
+                {
+                    "name": "reward_amount",
+                    "type": "u64"
                 }
             ]
         },
         {
-            "name": "whitelistMint",
-            "docs": [
-                "create a pda representing a migration mint"
+            "name": "migrate_mint",
+            "discriminator": [
+                44,
+                219,
+                122,
+                235,
+                251,
+                138,
+                113,
+                150
             ],
             "accounts": [
                 {
-                    "name": "collectionAuthority",
-                    "isMut": true,
-                    "isSigner": true
+                    "name": "nft_owner",
+                    "writable": true,
+                    "signer": true
                 },
                 {
-                    "name": "metaplexNftMint",
-                    "isMut": false,
-                    "isSigner": false
+                    "name": "user_migration_tracker",
+                    "writable": true,
+                    "pda": {
+                        "seeds": [
+                            {
+                                "kind": "account",
+                                "path": "nft_owner"
+                            }
+                        ]
+                    }
                 },
                 {
-                    "name": "migrationMintPda",
-                    "isMut": true,
-                    "isSigner": false
+                    "name": "migration_authority_pda",
+                    "writable": true,
+                    "pda": {
+                        "seeds": [
+                            {
+                                "kind": "account",
+                                "path": "wns_group"
+                            }
+                        ]
+                    }
                 },
                 {
-                    "name": "migrationAuthorityPda",
-                    "isMut": false,
-                    "isSigner": false
+                    "name": "migration_mint_pda",
+                    "writable": true,
+                    "pda": {
+                        "seeds": [
+                            {
+                                "kind": "account",
+                                "path": "metaplex_nft_mint"
+                            },
+                            {
+                                "kind": "account",
+                                "path": "migration_authority_pda"
+                            }
+                        ]
+                    }
                 },
                 {
-                    "name": "systemProgram",
-                    "isMut": false,
-                    "isSigner": false
+                    "name": "metaplex_collection_metadata",
+                    "writable": true
+                },
+                {
+                    "name": "metaplex_nft_mint",
+                    "writable": true
+                },
+                {
+                    "name": "metaplex_nft_token",
+                    "writable": true
+                },
+                {
+                    "name": "metaplex_nft_metadata",
+                    "writable": true
+                },
+                {
+                    "name": "metaplex_nft_edition",
+                    "writable": true
+                },
+                {
+                    "name": "metaplex_nft_master_edition",
+                    "writable": true
+                },
+                {
+                    "name": "metaplex_nft_token_record",
+                    "writable": true
+                },
+                {
+                    "name": "wns_manager"
+                },
+                {
+                    "name": "wns_group",
+                    "writable": true
+                },
+                {
+                    "name": "wns_nft_mint",
+                    "writable": true,
+                    "signer": true
+                },
+                {
+                    "name": "wns_nft_token",
+                    "writable": true
+                },
+                {
+                    "name": "wns_nft_member_account",
+                    "writable": true
+                },
+                {
+                    "name": "extra_metas_account",
+                    "writable": true
+                },
+                {
+                    "name": "reward_mint"
+                },
+                {
+                    "name": "reward_user_ta",
+                    "writable": true
+                },
+                {
+                    "name": "reward_program_ta",
+                    "writable": true
+                },
+                {
+                    "name": "metaplex_program"
+                },
+                {
+                    "name": "wns_program",
+                    "address": "wns1gDLt8fgLcGhWi5MqAqgXpwEP1JftKE9eZnXS1HM"
+                },
+                {
+                    "name": "system_program",
+                    "address": "11111111111111111111111111111111"
+                },
+                {
+                    "name": "instructions_program",
+                    "address": "Sysvar1nstructions1111111111111111111111111"
+                },
+                {
+                    "name": "rent",
+                    "address": "SysvarRent111111111111111111111111111111111"
+                },
+                {
+                    "name": "associated_token_program",
+                    "address": "ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL"
+                },
+                {
+                    "name": "token_program",
+                    "address": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
+                },
+                {
+                    "name": "token_program_2022",
+                    "address": "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb"
                 }
             ],
             "args": []
         },
         {
-            "name": "migrateMint",
+            "name": "update_collection",
+            "docs": [
+                "create a new wns group account"
+            ],
+            "discriminator": [
+                97,
+                70,
+                36,
+                49,
+                138,
+                12,
+                199,
+                239
+            ],
             "accounts": [
                 {
-                    "name": "nftOwner",
-                    "isMut": false,
-                    "isSigner": true
+                    "name": "collection_authority",
+                    "writable": true,
+                    "signer": true
                 },
                 {
-                    "name": "migrationAuthorityPda",
-                    "isMut": true,
-                    "isSigner": false
+                    "name": "migration_authority_pda",
+                    "pda": {
+                        "seeds": [
+                            {
+                                "kind": "account",
+                                "path": "wns_group"
+                            }
+                        ]
+                    }
                 },
                 {
-                    "name": "migrationMintPda",
-                    "isMut": true,
-                    "isSigner": false
+                    "name": "wns_group",
+                    "writable": true
                 },
                 {
-                    "name": "metaplexCollectionMetadata",
-                    "isMut": true,
-                    "isSigner": false
+                    "name": "system_program",
+                    "address": "11111111111111111111111111111111"
+                }
+            ],
+            "args": [
+                {
+                    "name": "amount_per_mint",
+                    "type": "u64"
+                }
+            ]
+        },
+        {
+            "name": "whitelist_mint",
+            "docs": [
+                "create a pda representing a migration mint"
+            ],
+            "discriminator": [
+                210,
+                85,
+                94,
+                18,
+                130,
+                142,
+                59,
+                121
+            ],
+            "accounts": [
+                {
+                    "name": "collection_authority",
+                    "writable": true,
+                    "signer": true
                 },
                 {
-                    "name": "metaplexNftMint",
-                    "isMut": true,
-                    "isSigner": false
+                    "name": "metaplex_nft_mint"
                 },
                 {
-                    "name": "metaplexNftToken",
-                    "isMut": true,
-                    "isSigner": false
+                    "name": "migration_mint_pda",
+                    "writable": true,
+                    "pda": {
+                        "seeds": [
+                            {
+                                "kind": "account",
+                                "path": "metaplex_nft_mint"
+                            },
+                            {
+                                "kind": "account",
+                                "path": "migration_authority_pda"
+                            }
+                        ]
+                    }
                 },
                 {
-                    "name": "metaplexNftMetadata",
-                    "isMut": true,
-                    "isSigner": false
+                    "name": "migration_authority_pda"
                 },
                 {
-                    "name": "metaplexNftEdition",
-                    "isMut": true,
-                    "isSigner": false
-                },
-                {
-                    "name": "metaplexNftMasterEdition",
-                    "isMut": true,
-                    "isSigner": false
-                },
-                {
-                    "name": "metaplexNftTokenRecord",
-                    "isMut": true,
-                    "isSigner": false
-                },
-                {
-                    "name": "wnsManager",
-                    "isMut": false,
-                    "isSigner": false
-                },
-                {
-                    "name": "wnsGroup",
-                    "isMut": true,
-                    "isSigner": false
-                },
-                {
-                    "name": "wnsNftMint",
-                    "isMut": true,
-                    "isSigner": true
-                },
-                {
-                    "name": "wnsNftToken",
-                    "isMut": true,
-                    "isSigner": false
-                },
-                {
-                    "name": "wnsNftMemberAccount",
-                    "isMut": true,
-                    "isSigner": false
-                },
-                {
-                    "name": "extraMetasAccount",
-                    "isMut": true,
-                    "isSigner": false
-                },
-                {
-                    "name": "metaplexProgram",
-                    "isMut": false,
-                    "isSigner": false
-                },
-                {
-                    "name": "wnsProgram",
-                    "isMut": false,
-                    "isSigner": false
-                },
-                {
-                    "name": "systemProgram",
-                    "isMut": false,
-                    "isSigner": false
-                },
-                {
-                    "name": "sysvarInstructions",
-                    "isMut": false,
-                    "isSigner": false
-                },
-                {
-                    "name": "rent",
-                    "isMut": false,
-                    "isSigner": false
-                },
-                {
-                    "name": "associatedTokenProgram",
-                    "isMut": false,
-                    "isSigner": false
-                },
-                {
-                    "name": "tokenProgram",
-                    "isMut": false,
-                    "isSigner": false
-                },
-                {
-                    "name": "tokenProgram2022",
-                    "isMut": false,
-                    "isSigner": false
+                    "name": "system_program",
+                    "address": "11111111111111111111111111111111"
                 }
             ],
             "args": []
@@ -250,34 +360,43 @@
     ],
     "accounts": [
         {
-            "name": "MigrationMintPda",
-            "docs": [
-                "empty struct representing an nft mint that's part of a collection to be burned"
-            ],
-            "type": {
-                "kind": "struct",
-                "fields": []
-            }
+            "name": "MigrationAuthorityPda",
+            "discriminator": [
+                116,
+                36,
+                29,
+                71,
+                202,
+                91,
+                188,
+                67
+            ]
         },
         {
-            "name": "MigrationAuthorityPda",
-            "type": {
-                "kind": "struct",
-                "fields": [
-                    {
-                        "name": "wnsGroup",
-                        "type": "publicKey"
-                    },
-                    {
-                        "name": "authority",
-                        "type": "publicKey"
-                    },
-                    {
-                        "name": "royalties",
-                        "type": "bool"
-                    }
-                ]
-            }
+            "name": "MigrationMintPda",
+            "discriminator": [
+                229,
+                82,
+                238,
+                151,
+                113,
+                169,
+                211,
+                29
+            ]
+        },
+        {
+            "name": "UserTracker",
+            "discriminator": [
+                141,
+                242,
+                54,
+                157,
+                209,
+                97,
+                210,
+                244
+            ]
         }
     ],
     "errors": [
@@ -295,6 +414,58 @@
             "code": 6002,
             "name": "ArithmeticOverflow",
             "msg": "Arithmetic overflow"
+        }
+    ],
+    "types": [
+        {
+            "name": "MigrationAuthorityPda",
+            "type": {
+                "kind": "struct",
+                "fields": [
+                    {
+                        "name": "wns_group",
+                        "type": "pubkey"
+                    },
+                    {
+                        "name": "authority",
+                        "type": "pubkey"
+                    },
+                    {
+                        "name": "royalties",
+                        "type": "bool"
+                    },
+                    {
+                        "name": "reward_mint",
+                        "type": "pubkey"
+                    },
+                    {
+                        "name": "reward_per_migration",
+                        "type": "u64"
+                    }
+                ]
+            }
+        },
+        {
+            "name": "MigrationMintPda",
+            "docs": [
+                "empty struct representing an nft mint that's part of a collection to be burned"
+            ],
+            "type": {
+                "kind": "struct",
+                "fields": []
+            }
+        },
+        {
+            "name": "UserTracker",
+            "type": {
+                "kind": "struct",
+                "fields": [
+                    {
+                        "name": "migration_count",
+                        "type": "u64"
+                    }
+                ]
+            }
         }
     ]
 }

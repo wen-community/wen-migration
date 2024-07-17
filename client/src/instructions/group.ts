@@ -8,7 +8,7 @@ import {
 	getWnsAtaAddress,
 } from '../utils/core';
 import {
-	PublicKey, SYSVAR_RENT_PUBKEY, SystemProgram,
+	PublicKey, SystemProgram,
 } from '@solana/web3.js';
 import {BN, type Provider} from '@coral-xyz/anchor';
 
@@ -19,6 +19,8 @@ export type CreateGroupArgs = {
 	maxSize: number;
 	royalties: boolean;
 	group: string;
+	rewardMint: string;
+	rewardAmount: number;
 };
 
 export const getMigrateCollectionIx = async (provider: Provider, args: CreateGroupArgs) => {
@@ -28,6 +30,7 @@ export const getMigrateCollectionIx = async (provider: Provider, args: CreateGro
 	const migrationAuthorityPda = getMigrationAuthorityPda(group.toString());
 	const authority = provider.publicKey ?? PublicKey.default;
 	const collectionSize = new BN(args.maxSize) as BN;
+	const rewardAmount = new BN(args.rewardAmount) as BN;
 
 	const ix = await migrationProgram.methods
 		.migrateCollection(
@@ -35,10 +38,11 @@ export const getMigrateCollectionIx = async (provider: Provider, args: CreateGro
 			args.symbol,
 			args.uri,
 			collectionSize,
-			args.royalties)
+			args.royalties,
+			rewardAmount
+		)
 		.accountsStrict({
 			systemProgram: SystemProgram.programId,
-			rent: SYSVAR_RENT_PUBKEY,
 			associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID,
 			tokenProgram: token22ProgramId,
 			collectionAuthority: authority,
@@ -46,7 +50,28 @@ export const getMigrateCollectionIx = async (provider: Provider, args: CreateGro
 			wnsGroupMint: groupMint,
 			wnsGroupMintTokenAccount: getWnsAtaAddress(args.group, authority.toString()),
 			wnsManager: getManagerAccountPda(),
+			rewardMint: args.rewardMint,
 			wnsProgram: wnsProgramId,
+			migrationAuthorityPda,
+		})
+		.instruction();
+
+	return ix;
+};
+
+export const getUpdateCollectionIx = async (provider: Provider, groupMint: string, amount: number) => {
+	const migrationProgram = getMigrationProgram(provider);
+	const group = getGroupAccountPda(groupMint);
+	const migrationAuthorityPda = getMigrationAuthorityPda(group.toString());
+	const authority = provider.publicKey ?? PublicKey.default;
+	const amountPerMint = new BN(amount) as BN;
+
+	const ix = await migrationProgram.methods
+		.updateCollection(amountPerMint)
+		.accountsStrict({
+			systemProgram: SystemProgram.programId,
+			collectionAuthority: authority,
+			wnsGroup: group,
 			migrationAuthorityPda,
 		})
 		.instruction();

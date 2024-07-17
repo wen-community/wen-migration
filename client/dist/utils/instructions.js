@@ -16,7 +16,7 @@ const instructions_1 = require("../instructions");
         provider: anchor provider
         nfts
 */
-const getMigrateNftsIx = (provider, nfts, wnsNfts, group) => __awaiter(void 0, void 0, void 0, function* () {
+const getMigrateNftsIx = (provider, nfts, wnsNfts, group, rewardMint) => __awaiter(void 0, void 0, void 0, function* () {
     const owner = provider.wallet.publicKey.toString();
     const ixs = [];
     let i = 0;
@@ -30,6 +30,7 @@ const getMigrateNftsIx = (provider, nfts, wnsNfts, group) => __awaiter(void 0, v
             metaplexCollection: collection,
             metaplexMint: mint,
             wnsNft,
+            rewardMint
         });
         i++;
         ixs.push(migrateIx);
