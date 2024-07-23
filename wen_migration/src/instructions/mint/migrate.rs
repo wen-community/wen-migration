@@ -273,7 +273,7 @@ pub fn handler(ctx: Context<MigrateMint>) -> Result<()> {
 
     if reward_amount > 0 && reward_mint != ctx.accounts.system_program.key() {
         let scaled_rewards = if current_migrations + 1 % 20 == 0 {
-            reward_amount * 20
+            reward_amount * 50
         } else {
             reward_amount
         };
