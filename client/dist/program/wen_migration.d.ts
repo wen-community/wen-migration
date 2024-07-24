@@ -420,6 +420,11 @@ export type WenMigration = {
             "code": 6002;
             "name": "arithmeticOverflow";
             "msg": "Arithmetic overflow";
+        },
+        {
+            "code": 6003;
+            "name": "invalidAta";
+            "msg": "Invalid ATA";
         }
     ];
     "types": [

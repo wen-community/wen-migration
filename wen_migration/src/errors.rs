@@ -8,4 +8,6 @@ pub enum DistributionErrors {
     InvalidCreatorPctAmount,
     #[msg("Arithmetic overflow")]
     ArithmeticOverflow,
+    #[msg("Invalid ATA")]
+    InvalidAta,
 }

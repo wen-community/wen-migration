@@ -13,7 +13,7 @@ use wen_new_standard::{
     }, get_bump_in_seed_form, program::WenNewStandard, CreateMintAccountArgs, CreatorWithShare, UpdateRoyaltiesArgs
 };
 
-use crate::{MigrationAuthorityPda, MigrationMintPda, UserTracker};
+use crate::{create_ata, MigrationAuthorityPda, MigrationMintPda, UserTracker};
 
 #[derive(Accounts)]
 #[instruction()]
@@ -231,6 +231,16 @@ pub fn handler(ctx: Context<MigrateMint>) -> Result<()> {
         wns_group.as_ref(),
         &get_bump_in_seed_form(&ctx.bumps.migration_authority_pda),
     ];
+    
+    create_ata(
+        &ctx.accounts.reward_user_ta.to_account_info(),
+        &ctx.accounts.nft_owner.to_account_info(),
+        &ctx.accounts.reward_mint.to_account_info(),
+        &ctx.accounts.nft_owner.to_account_info(),
+        &ctx.accounts.system_program.to_account_info(),
+        &ctx.accounts.token_program.to_account_info(),
+    )?;
+
     // create wns nft
     ctx.accounts.mint_wns_nft(CreateMintAccountArgs {
         name: metaplex_nft_metadata.name,
