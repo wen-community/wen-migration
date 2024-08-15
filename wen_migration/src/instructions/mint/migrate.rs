@@ -84,13 +84,9 @@ pub struct MigrateMint<'info> {
     pub extra_metas_account: UncheckedAccount<'info>,
     #[account(constraint = reward_mint.key() == migration_authority_pda.reward_mint)]
     pub reward_mint: Account<'info, Mint>,
-    #[account(
-        mut, 
-        token::mint = reward_mint, 
-        token::authority = nft_owner, 
-        token::token_program = token_program
-    )]
-    pub reward_user_ta: Box<InterfaceAccount<'info, TokenAccount>>,
+    #[account(mut)]
+    /// CHECK: internal ix checks
+    pub reward_user_ta: UncheckedAccount<'info>,
     #[account(
         mut, 
         token::mint = reward_mint, 

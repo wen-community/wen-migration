@@ -1,6 +1,6 @@
 [package]
 name = "wen-migration"
-version = "0.0.1-alpha"
+version = "0.0.2-alpha"
 description = "Program for migrating from metaplex to WNS"
 edition = "2018"
 
